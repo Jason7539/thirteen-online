@@ -1,18 +1,9 @@
-const express = require('express');
-const app = express();
-const port = 8080;
-const path = require('path')
-const parentDir = path.resolve(__dirname, '..');
 
 
-app.use(express.static(path.join(__dirname, "public")));
+const App = () => {
+  return (
+    <h1>Hello, React</h1>
+  );
+  }
 
-
-
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/html/index.html');
-})
-
-app.listen(port, () => {
-  console.log(`example app listening on port ${port}`)
-})
+export default App;
