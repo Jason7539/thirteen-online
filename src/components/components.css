@@ -1,0 +1,35 @@
+
+*{
+    box-sizing: border-box;
+    font-family: monospace, sans-serif;
+    font-size: 1.3rem;
+}
+
+nav{
+    text-align: right;
+}
+
+.lobbyBtn button{
+    display: flex;
+    margin: .5rem auto .5rem auto;
+}
+
+.checker{
+    background-color: yellow;
+}
+
+.loginScreen{
+    background-color: yellow;
+    max-width: 500px;
+    margin: 0 auto 0 auto;
+    
+}
+
+.loginScreen input, button {
+    margin: .5rem auto .5rem auto;
+}
+
+.loginScreen *{
+    display: block;
+    text-align: center;
+}
