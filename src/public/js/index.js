@@ -1,5 +1,7 @@
 "use strict"
 
+// TODO: highlight current user name upon lobby creation/joining
+// TODO: validation for joining full lobby
 
 document.querySelector('#login_btn').addEventListener('click', () =>{
     hide_content();
@@ -18,7 +20,7 @@ document.querySelector('#create_room_btn').addEventListener('click', () =>{
 } )
 
 // Joining public game
-// TODO: if no lobbies display info
+// TODO: when there are no lobbies, display "no rooms available to join"
 document.querySelector('#join_lobby_btn').addEventListener('click', () =>{
     hide_content();
     document.querySelector('.join_lobby_screen').classList.remove('hide');
@@ -37,13 +39,39 @@ document.querySelector('#join_lobby_btn').addEventListener('click', () =>{
             li.id = lobby.id;
             li.innerHTML = lobby.name;
 
-            li.onclick = registerLobbyRoom(lobby.id);
+            // on click join lobbies 
+            li.onclick = () => { 
+                // prompt username
+                let username = prompt("Please enter your username", "username");
+
+                // update the page with lobby information
+                hide_content()
+                document.querySelector('.public_lobby_screen').classList.remove('hide');
+                document.querySelector("#lobby_name").innerHTML = lobby.name;
+                
+                // populate player list
+                let nextIl = 0;
+                for (let [index, player] of lobby.players.entries()){
+                    console.log(player)
+                    document.querySelector("#p"+ index).innerHTML = player.name;
+                    nextIl += 1;
+                }
+
+                document.querySelector("#p"+ nextIl).innerHTML = username;
+
+
+                // hide start game button for joiners 
+                document.querySelector('#host_button').classList.add('hide');
+
+                // send joining player to server
+                socket.emit('lobby-join', username, lobby.id);
+                registerLobbyRoom(lobby.id);
+            
+            };
+
             lobbyList.appendChild(li);
         }
     });
-    // on click join lobbies 
-    
-
 } )
 
 

@@ -18,6 +18,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // TODO set max lobby creation
 let lobbies = [];
 
+// TODO: future improvement, remove socket.io used to keep track of players -> generate unique id 
+// how to keep better track of user disconnect 
+
 io.on('connection', (socket) => {
   console.log('a user connected:' + socket.id);
 
@@ -64,8 +67,20 @@ io.on('connection', (socket) => {
 
   });
 
-  socket.on('player-join', (lobbies, callback) => {
+  socket.on('lobby-join', (username, lobbyId) => {
+    console.log(username + " on " + lobbyId);
 
+    let lobbyToJoinIndex = lobbies.findIndex(l => l.id ===lobbyId);
+    lobbies[lobbyToJoinIndex].addPlayers(new Player(socket.id, username));
+
+    console.log(lobbies[lobbyToJoinIndex].players);
+    console.log("inside join");
+    console.log(lobbyId)
+    console.log(lobbies[lobbyToJoinIndex].id);
+
+    socket.join(lobbyId);
+    // emit lobbyid so players get updated player list
+    io.to(lobbyId).emit("update-lobby", lobbies[lobbyToJoinIndex]);
   });
 
 
