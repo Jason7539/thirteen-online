@@ -15,7 +15,7 @@ const parentDir = path.resolve(__dirname, '..');
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// TODO set max lobby creation
+// TODO set max allowed lobbies
 let lobbies = [];
 
 // TODO: future improvement, remove socket.io used to keep track of players -> generate unique id 
@@ -28,9 +28,7 @@ io.on('connection', (socket) => {
     console.log('a user disconnected:' + socket.id);
 
     // remove lobby when host disconnect 
-    let delRoomIndex = lobbies.findIndex(elm => elm.hostId === socket.id);
-    
-    let rooms = socket.rooms;
+    let delRoomIndex = lobbies.findIndex(lobby => lobby.hostId === socket.id);
     
     console.log('room index' + delRoomIndex);
     if (delRoomIndex > -1) {
@@ -43,8 +41,21 @@ io.on('connection', (socket) => {
 
       console.log('deleted room at index: ' + delRoomIndex);
       lobbies.splice(delRoomIndex, 1);
+      return;
     }
     
+    // remove joiners from lobbies on DC and call update-lobby
+    for(let i = 0; i < lobbies.length; i++)
+    {
+      let delPlayerIndex = lobbies[i].players.findIndex(player => player.id === socket.id);
+      if(delPlayerIndex > -1) {
+        lobbies[i].players.splice(delPlayerIndex, 1);
+        io.to(lobbies[i].id).emit('update-lobby', lobbies[i]);
+        return;
+      }
+    }
+
+    // alert joiners when host DC 
 
   });
 
