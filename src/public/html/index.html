@@ -50,6 +50,7 @@
     <section class="container">
         <div class="lobby_screen hide">
             <input type="text" id="user_lobby_name" placeholder="Lobby Name"><br>
+            <input type="text" id="user_name" placeholder="Username"><br>
 
             <input type="radio" id="public_lobby" name="user_lobby" value="Public" checked="checked">
             <label for="public_lobby">Public</label>
@@ -77,6 +78,9 @@
                 <option>Private</option>
             </select>
             <input type="search"><br>
+            <ul id="lobbies-list">
+                
+            </ul>
         </div>
 
     </section>
@@ -85,13 +89,14 @@
     <section class="container">
         <div class="public_lobby_screen hide">
             <h3>Public Lobby</h3>
-            <input type="text" placeholder="player's name">
-            <button>Start Game</button>
+            <h2 id="lobby_name"></h2>
+
+            <button id="host_button">Start Game</button>
             <ul>
-                <li>player's 1 name</li>
-                <li>player's 2 name</li>
-                <li>player's 3 name</li>
-                <li>player's 4 name</li>
+                <li id="p0"></li>
+                <li id="p1"></li>
+                <li id="p2"></li>
+                <li id="p3"></li>
             </ul>
         </div>
     </section>
@@ -103,17 +108,20 @@
             <input type="text" placeholder="player's name">
             <button>Start Game</button>
             <ul>
-                <li>player's 1 name</li>
-                <li>player's 2 name</li>
-                <li>player's 3 name</li>
-                <li>player's 4 name</li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
             </ul>
         </div>
     </section>
 
 
 
-
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="../js/client.js"></script>
     <script type="text/javascript" src="../js/index.js"></script>
+
+
 </body>
 </html>
