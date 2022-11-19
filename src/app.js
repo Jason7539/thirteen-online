@@ -16,12 +16,15 @@ app.use(express.static(path.join(__dirname, "src", "public")));
 
 // TODO set max allowed lobbies
 let lobbies = [];
-
 // TODO: future improvement, remove socket.io used to keep track of players -> generate unique id
 // how to keep better track of user disconnect
 
 io.on("connection", (socket) => {
-  console.log("a user connected:" + socket.id);
+  console.log("a user connected: " + socket.id);
+
+  //export lobbies
+
+  socket.emit("Test", "test");
 
   socket.on("disconnect", () => {
     console.log("a user disconnected:" + socket.id);

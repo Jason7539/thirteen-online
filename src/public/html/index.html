@@ -17,6 +17,7 @@
       <div class="lobby_btn">
         <button id="create_room_btn">Create Room</button>
         <button id="join_lobby_btn">Join Lobby</button>
+        <button id="Test">Test</button>
       </div>
     </section>
 
@@ -70,13 +71,14 @@
     </section>
 
     <section class="container">
-      <div class="lobby_screen hide">
+      <form class="lobby_screen hide" id="lobby_screen_form">
         <input
           type="text"
           id="user_lobby_name"
           placeholder="Lobby Name"
+          required
         /><br />
-        <input type="text" id="user_name" placeholder="Username" /><br />
+        <input type="text" id="user_name" placeholder="Username" required /><br />
 
         <input
           type="radio"
@@ -93,8 +95,8 @@
           value="Private"
         />
         <label for="private_lobby">Private</label><br />
-        <button id="lobby_submit_btn">Submit</button>
-      </div>
+        <button type="submit">Submit</button>
+      </from>
     </section>
 
     <section class="container">

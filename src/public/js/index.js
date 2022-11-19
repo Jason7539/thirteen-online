@@ -2,6 +2,8 @@
 
 import { socket } from "./client.js";
 
+const MAX_LOBBY = 2;
+
 // TODO: highlight current user name upon lobby creation/joining
 // TODO: validation for joining full lobby
 
@@ -73,32 +75,43 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
 });
 
 // Lobby creation
-document.querySelector("#lobby_submit_btn").addEventListener("click", () => {
-  let selected = document.querySelector(
-    'input[name="user_lobby"]:checked'
-  ).value;
-  if (selected == "Public") {
-    hide_content();
-    document.querySelector(".public_lobby_screen").classList.remove("hide");
-  } else {
-    hide_content();
-    document.querySelector(".private_lobby_screen").classList.remove("hide");
-  }
+document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  //Max lobby Created
+  socket.emit("fetch-lobbies", (callback) => {
+    let currentLobby = callback.lobbies.length;
+    if (currentLobby >= MAX_LOBBY) {
+      alert("Maximum lobby created, Please join an existing room");
+    } else {
+      let selected = document.querySelector(
+        'input[name="user_lobby"]:checked'
+      ).value;
+      if (selected == "Public") {
+        hide_content();
+        document.querySelector(".public_lobby_screen").classList.remove("hide");
+      } else {
+        hide_content();
+        document
+          .querySelector(".private_lobby_screen")
+          .classList.remove("hide");
+      }
 
-  // TODO: Validation if fields are empty
-  // set character limits
-  let lobbyname = document.querySelector("#user_lobby_name").value;
-  let username = document.querySelector("#user_name").value;
-  socket.emit("lobby-creation", lobbyname, username, (response) => {
-    console.log(response);
+      // TODO: Validation if fields are empty
+      // set character limits
+      let lobbyname = document.querySelector("#user_lobby_name").value;
+      let username = document.querySelector("#user_name").value;
+      socket.emit("lobby-creation", lobbyname, username, (response) => {
+        console.log(response);
 
-    // update name: based on the
-    document.querySelector("#lobby_name").innerHTML = response.lobby.name;
+        // update name: based on the
+        document.querySelector("#lobby_name").innerHTML = response.lobby.name;
 
-    // populate player list
-    for (let [index, player] of response.lobby.players.entries()) {
-      console.log(player);
-      document.querySelector("#p" + index).innerHTML = player.name;
+        // populate player list
+        for (let [index, player] of response.lobby.players.entries()) {
+          console.log(player);
+          document.querySelector("#p" + index).innerHTML = player.name;
+        }
+      });
     }
   });
 });
