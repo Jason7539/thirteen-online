@@ -23,7 +23,7 @@ document.querySelector("#create_room_btn").addEventListener("click", () => {
 });
 
 // Joining public game
-// TODO: when there are no lobbies, display "no rooms available to join"
+// TODO: when there are no lobbies, display "no rooms available to join" DONE
 document.querySelector("#join_lobby_btn").addEventListener("click", () => {
   hide_content();
   document.querySelector(".join_lobby_screen").classList.remove("hide");
@@ -34,46 +34,51 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
 
     let lobbyList = document.querySelector("#lobbies-list");
 
-    // create li for each lobby
-    // TODO: make li look clickable using classes
-    for (let lobby of callback.lobbies) {
-      console.log(lobby);
-      let li = document.createElement("li");
-      li.id = lobby.id;
-      li.innerHTML = lobby.name;
+    if (callback.lobbies.length == 0 || callback.lobbies.length == null) {
+      alert("no more room available to join");
+    } else {
+      // create li for each lobby
+      // TODO: make li look clickable using classes
+      for (let lobby of callback.lobbies) {
+        console.log(lobby);
+        let li = document.createElement("li");
+        li.id = lobby.id;
+        li.innerHTML = lobby.name;
 
-      // on click join lobbies
-      li.onclick = () => {
-        // prompt username
-        let username = prompt("Please enter your username", "username");
+        // on click join lobbies
+        li.onclick = () => {
+          // prompt username
+          let username = prompt("Please enter your username", "username");
 
-        // update the page with lobby information
-        hide_content();
-        document.querySelector(".public_lobby_screen").classList.remove("hide");
-        document.querySelector("#lobby_name").innerHTML = lobby.name;
+          // update the page with lobby information
+          hide_content();
+          document
+            .querySelector(".public_lobby_screen")
+            .classList.remove("hide");
+          document.querySelector("#lobby_name").innerHTML = lobby.name;
 
-        // populate player list
-        let nextIl = 0;
-        for (let [index, player] of lobby.players.entries()) {
-          console.log(player);
-          document.querySelector("#p" + index).innerHTML = player.name;
-          nextIl += 1;
-        }
+          // populate player list
+          let nextIl = 0;
+          for (let [index, player] of lobby.players.entries()) {
+            console.log(player);
+            document.querySelector("#p" + index).innerHTML = player.name;
+            nextIl += 1;
+          }
 
-        document.querySelector("#p" + nextIl).innerHTML = username;
+          document.querySelector("#p" + nextIl).innerHTML = username;
 
-        // hide start game button for joiners
-        document.querySelector("#host_button").classList.add("hide");
+          // hide start game button for joiners
+          document.querySelector("#host_button").classList.add("hide");
 
-        // send joining player to server
-        socket.emit("lobby-join", username, lobby.id);
-      };
+          // send joining player to server
+          socket.emit("lobby-join", username, lobby.id);
+        };
 
-      lobbyList.appendChild(li);
+        lobbyList.appendChild(li);
+      }
     }
   });
 });
-
 // Lobby creation
 document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -81,7 +86,7 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
   socket.emit("fetch-lobbies", (callback) => {
     let currentLobby = callback.lobbies.length;
     if (currentLobby >= MAX_LOBBY) {
-      alert("Maximum lobby created, Please join an existing room");
+      alert("Max lobby created, Please join an existing room");
     } else {
       let selected = document.querySelector(
         'input[name="user_lobby"]:checked'
