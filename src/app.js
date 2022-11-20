@@ -92,6 +92,10 @@ io.on("connection", (socket) => {
     io.to(lobbyId).emit("update-lobby", lobbies[lobbyToJoinIndex]);
   });
 
+  socket.on("init-game", (lobbyId) => {
+    io.to(lobbyId).emit("init-game");
+  });
+
   // send all lobbies for joining players
   socket.on("fetch-lobbies", (callback) => {
     callback({
@@ -107,7 +111,6 @@ io.on("connection", (socket) => {
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "src", "public", "html", "index.html"));
-  //res.sendFile(__dirname + "/public/html/index.html");
 });
 
 server.listen(port, () => {

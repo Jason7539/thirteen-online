@@ -2,6 +2,8 @@
 
 import { socket } from "./client.js";
 
+sessionStorage.clear();
+
 // TODO: highlight current user name upon lobby creation/joining
 // TODO: validation for joining full lobby
 
@@ -21,6 +23,7 @@ document.querySelector("#create_room_btn").addEventListener("click", () => {
 });
 
 // Joining public game
+// TODO: prevent joiners from joining a game that is inprogress.
 // TODO: when there are no lobbies, display "no rooms available to join"
 document.querySelector("#join_lobby_btn").addEventListener("click", () => {
   hide_content();
@@ -61,10 +64,13 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
         document.querySelector("#p" + nextIl).innerHTML = username;
 
         // hide start game button for joiners
-        document.querySelector("#host_button").classList.add("hide");
+        document.querySelector("#start_button").classList.add("hide");
 
         // send joining player to server
         socket.emit("lobby-join", username, lobby.id);
+
+        sessionStorage.setItem("username", username);
+        sessionStorage.setItem("lobbyId", lobby.id);
       };
 
       lobbyList.appendChild(li);
@@ -89,6 +95,10 @@ document.querySelector("#lobby_submit_btn").addEventListener("click", () => {
   // set character limits
   let lobbyname = document.querySelector("#user_lobby_name").value;
   let username = document.querySelector("#user_name").value;
+
+  sessionStorage.setItem("username", username);
+  sessionStorage.setItem("lobbyId", "lobby-" + socket.id);
+
   socket.emit("lobby-creation", lobbyname, username, (response) => {
     console.log(response);
 
@@ -101,6 +111,11 @@ document.querySelector("#lobby_submit_btn").addEventListener("click", () => {
       document.querySelector("#p" + index).innerHTML = player.name;
     }
   });
+});
+
+document.getElementById("start_button").addEventListener("click", () => {
+  socket.emit("init-game", sessionStorage.getItem("lobbyId"));
+  // TODO: hide create/join lobby on game start?
 });
 
 const hide_content = () => {
