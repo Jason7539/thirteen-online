@@ -37,7 +37,6 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
         "no more room available to join";
     } else {
       // create li for each lobby
-      // TODO: make li look clickable using classes
       for (let lobby of callback.lobbies) {
         console.log(lobby);
         let li = document.createElement("li");
@@ -46,32 +45,43 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
         li.classList.add("hover");
 
         // on click join lobbies
+        //Check for existing names in the lobby before joining
         li.onclick = () => {
+          const usernameCheck = () => {
+            let username = prompt("Please enter your username", "username");
+            let playerList = lobby.players.map(({ name }) => name);
+            if (!playerList.includes(username)) {
+              hide_content();
+              document
+                .querySelector(".public_lobby_screen")
+                .classList.remove("hide");
+              document.querySelector("#lobby_name").innerHTML = lobby.name;
+
+              // populate player list
+              let nextIl = 0;
+              for (let [index, player] of lobby.players.entries()) {
+                console.log(player);
+                document.querySelector("#p" + index).innerHTML = player.name;
+                nextIl += 1;
+              }
+
+              document.querySelector("#p" + nextIl).innerHTML = username;
+
+              // hide start game button for joiners
+              document.querySelector("#host_button").classList.add("hide");
+
+              // send joining player to server
+              socket.emit("lobby-join", username, lobby.id);
+            } else {
+              alert("Username already taken, please choose another name");
+              usernameCheck();
+            }
+          };
+          usernameCheck();
+
           // prompt username
-          let username = prompt("Please enter your username", "username");
 
           // update the page with lobby information
-          hide_content();
-          document
-            .querySelector(".public_lobby_screen")
-            .classList.remove("hide");
-          document.querySelector("#lobby_name").innerHTML = lobby.name;
-
-          // populate player list
-          let nextIl = 0;
-          for (let [index, player] of lobby.players.entries()) {
-            console.log(player);
-            document.querySelector("#p" + index).innerHTML = player.name;
-            nextIl += 1;
-          }
-
-          document.querySelector("#p" + nextIl).innerHTML = username;
-
-          // hide start game button for joiners
-          document.querySelector("#host_button").classList.add("hide");
-
-          // send joining player to server
-          socket.emit("lobby-join", username, lobby.id);
         };
 
         lobbyList.appendChild(li);
