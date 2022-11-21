@@ -4,8 +4,7 @@ import { socket } from "./client.js";
 
 const MAX_LOBBY = 3;
 
-// TODO: highlight current user name upon lobby creation/joining
-// TODO: validation for joining full lobby
+// TODO: validation for joining full lobby //MAX PLAYER==4 stop user from joining // lobby ---- 2/4
 
 document.querySelector("#login_btn").addEventListener("click", () => {
   hide_content();
@@ -23,7 +22,6 @@ document.querySelector("#create_room_btn").addEventListener("click", () => {
 });
 
 // Joining public game
-// TODO: when there are no lobbies, display "no rooms available to join" DONE
 document.querySelector("#join_lobby_btn").addEventListener("click", () => {
   hide_content();
   document.querySelector(".join_lobby_screen").classList.remove("hide");
@@ -35,7 +33,8 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
     let lobbyList = document.querySelector("#lobbies-list");
 
     if (callback.lobbies.length == 0 || callback.lobbies.length == null) {
-      alert("no more room available to join");
+      document.querySelector("#lobbies-list").innerHTML =
+        "no more room available to join";
     } else {
       // create li for each lobby
       // TODO: make li look clickable using classes
@@ -44,6 +43,7 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
         let li = document.createElement("li");
         li.id = lobby.id;
         li.innerHTML = lobby.name;
+        li.classList.add("hover");
 
         // on click join lobbies
         li.onclick = () => {

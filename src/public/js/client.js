@@ -13,6 +13,7 @@ socket.on("update-lobby", (lobby) => {
     document.querySelector("#p" + i).innerHTML = lobby.players[i]
       ? lobby.players[i].name
       : "";
+    //document.querySelector()
   }
 });
 
