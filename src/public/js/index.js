@@ -1,10 +1,6 @@
 "use strict";
 
-import { socket } from "./client.js";
-
-const MAX_LOBBY = 3;
-
-// TODO: validation for joining full lobby //MAX PLAYER==4 stop user from joining // lobby ---- 2/4
+import { MAX_PLAYERS, socket, MAX_LOBBY } from "./client.js";
 
 document.querySelector("#login_btn").addEventListener("click", () => {
   hide_content();
@@ -36,48 +32,63 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
       document.querySelector("#lobbies-list").innerHTML =
         "no more room available to join";
     } else {
-      // create li for each lobby
+      let lobbyNames = document.getElementById("lobbies-list");
+      while (lobbyNames.firstChild) {
+        lobbyNames.removeChild(lobbyNames.firstChild);
+      }
+
       for (let lobby of callback.lobbies) {
         console.log(lobby);
+
+        let playerList = lobby.players.map(({ name }) => name);
+
         let li = document.createElement("li");
         li.id = lobby.id;
-        li.innerHTML = lobby.name;
+        li.innerHTML = `${lobby.name}   ${playerList.length}/${MAX_PLAYERS}`;
         li.classList.add("hover");
 
         // on click join lobbies
         //Check for existing names in the lobby before joining
         li.onclick = () => {
-          const usernameCheck = () => {
-            let username = prompt("Please enter your username", "username");
-            let playerList = lobby.players.map(({ name }) => name);
-            if (!playerList.includes(username)) {
-              hide_content();
-              document
-                .querySelector(".public_lobby_screen")
-                .classList.remove("hide");
-              document.querySelector("#lobby_name").innerHTML = lobby.name;
+          if (playerList.length === MAX_PLAYERS) {
+            alert("LOBBY IS FULL");
+          } else {
+            const usernameCheck = () => {
+              let username = prompt("Please enter your username", "username");
+              if (username === undefined) {
+                return;
+              } else if (
+                !playerList.includes(username) &&
+                username.trim() !== ""
+              ) {
+                hide_content();
+                document
+                  .querySelector(".public_lobby_screen")
+                  .classList.remove("hide");
+                document.querySelector("#lobby_name").innerHTML = lobby.name;
 
-              // populate player list
-              let nextIl = 0;
-              for (let [index, player] of lobby.players.entries()) {
-                console.log(player);
-                document.querySelector("#p" + index).innerHTML = player.name;
-                nextIl += 1;
+                // populate player list
+                let nextIl = 0;
+                for (let [index, player] of lobby.players.entries()) {
+                  console.log(player);
+                  document.querySelector("#p" + index).innerHTML = player.name;
+                  nextIl += 1;
+                }
+
+                document.querySelector("#p" + nextIl).innerHTML = username;
+
+                // hide start game button for joiners
+                document.querySelector("#host_button").classList.add("hide");
+
+                // send joining player to server
+                socket.emit("lobby-join", username, lobby.id);
+              } else {
+                alert("Username already taken, please choose another name");
+                usernameCheck();
               }
-
-              document.querySelector("#p" + nextIl).innerHTML = username;
-
-              // hide start game button for joiners
-              document.querySelector("#host_button").classList.add("hide");
-
-              // send joining player to server
-              socket.emit("lobby-join", username, lobby.id);
-            } else {
-              alert("Username already taken, please choose another name");
-              usernameCheck();
-            }
-          };
-          usernameCheck();
+            };
+            usernameCheck();
+          }
 
           // prompt username
 
@@ -111,8 +122,6 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
           .classList.remove("hide");
       }
 
-      // TODO: Validation if fields are empty
-      // set character limits
       let lobbyname = document.querySelector("#user_lobby_name").value;
       let username = document.querySelector("#user_name").value;
       socket.emit("lobby-creation", lobbyname, username, (response) => {
