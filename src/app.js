@@ -24,8 +24,6 @@ io.on("connection", (socket) => {
 
   //export lobbies
 
-  socket.emit("Test", "test");
-
   socket.on("disconnect", () => {
     console.log("a user disconnected:" + socket.id);
     // remove lobby when host disconnect

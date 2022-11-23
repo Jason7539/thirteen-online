@@ -28,7 +28,7 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
 
     let lobbyList = document.querySelector("#lobbies-list");
 
-    if (callback.lobbies.length == 0 || callback.lobbies.length == null) {
+    if (callback.lobbies.length === 0 || callback.lobbies.length === null) {
       document.querySelector("#lobbies-list").innerHTML =
         "no more room available to join";
     } else {
@@ -124,6 +124,7 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
 
       let lobbyname = document.querySelector("#user_lobby_name").value;
       let username = document.querySelector("#user_name").value;
+
       socket.emit("lobby-creation", lobbyname, username, (response) => {
         console.log(response);
 
