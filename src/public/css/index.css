@@ -61,3 +61,8 @@ nav {
   border-radius: 4px;
   list-style-type: none;
 }
+
+.hover:hover {
+  color: gray;
+  font-weight: bold;
+}
