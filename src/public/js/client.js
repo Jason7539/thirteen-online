@@ -18,8 +18,8 @@ socket.on("update-lobby", (lobby) => {
 });
 
 socket.on("host-disconnect", () => {
+  alert("Host Disconnected: please join another lobby");
   document.location.reload();
-  alert("HOST DC");
 });
 
 export { socket, MAX_PLAYERS, MAX_LOBBY };
