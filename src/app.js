@@ -7,6 +7,7 @@ import path from "path";
 import http from "http";
 import { Server } from "socket.io";
 import { Player, Lobby } from "./lobby.js";
+import { GameLogic } from "./gameLogic.js";
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -22,6 +23,9 @@ let lobbies = [];
 
 io.on("connection", (socket) => {
   console.log("a user connected:" + socket.id);
+
+  let gameLogic = new GameLogic(io, socket, lobbies);
+  gameLogic.init();
 
   socket.on("disconnect", () => {
     console.log("a user disconnected:" + socket.id);
