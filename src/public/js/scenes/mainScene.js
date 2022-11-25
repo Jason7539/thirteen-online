@@ -27,7 +27,14 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
+    let pass_button = this.add.image(900, 540, "pass_button").setInteractive();
+    let play_button = this.add.image(1100, 540, "play_button").setInteractive();
     let player = new Player(this);
+
+    pass_button.on("pointerdown", () => {
+      alert("you click pass");
+    });
+
     let cardFrames = this.textures.get("cards").getFrameNames();
 
     cardFrames.splice(cardFrames.indexOf("joker"), 1);
@@ -56,21 +63,11 @@ export default class mainScene extends Phaser.Scene {
       console.log(respPlayer.hand);
       console.log(respPlayer.isTurn);
       player.addHand(respPlayer.hand);
-      player.render(200, 500);
-
-      player.printCardGameObj();
     });
 
     // let card = this.add
     //   .image(200, 500, "cards", cardFrames[1])
     //   .setInteractive();
-
-    let pass_button = this.add.image(900, 540, "pass_button").setInteractive();
-    let play_button = this.add.image(1100, 540, "play_button").setInteractive();
-
-    pass_button.on("pointerdown", () => {
-      alert("you click pass");
-    });
 
     // card.on("pointerdown", () => {
     //   console.log("you clicked the card");
