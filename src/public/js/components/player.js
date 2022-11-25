@@ -1,6 +1,8 @@
 export default class Player {
   pixelheightDisplacement = 15;
   cardWidthDifference = 30;
+  handXorigin = 200;
+  handYorigin = 500;
 
   constructor(scene) {
     this.scene = scene;
@@ -12,7 +14,7 @@ export default class Player {
   // addHand will call render. registerEvents and register data
   addHand(hand) {
     this.hand = hand;
-    this.render(200, 500);
+    this.render(this.handXorigin, this.handYorigin);
     this.registerEvents();
   }
 

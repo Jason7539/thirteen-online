@@ -24,8 +24,7 @@ let lobbies = [];
 io.on("connection", (socket) => {
   console.log("a user connected:" + socket.id);
 
-  let gameLogic = new GameLogic(io, socket, lobbies);
-  gameLogic.init();
+  new GameLogic(io, socket, lobbies).init();
 
   socket.on("disconnect", () => {
     console.log("a user disconnected:" + socket.id);

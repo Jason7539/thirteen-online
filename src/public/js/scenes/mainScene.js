@@ -1,6 +1,7 @@
 import Player from "../components/player.js";
 import { socket } from "../client.js";
 
+// eslint-disable-next-line no-undef
 export default class mainScene extends Phaser.Scene {
   constructor() {
     super({
@@ -27,13 +28,9 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
-    let pass_button = this.add.image(900, 540, "pass_button").setInteractive();
-    let play_button = this.add.image(1100, 540, "play_button").setInteractive();
+    this.add.image(900, 540, "pass_button").setInteractive();
+    this.add.image(1100, 540, "play_button").setInteractive();
     let player = new Player(this);
-
-    pass_button.on("pointerdown", () => {
-      alert("you click pass");
-    });
 
     let cardFrames = this.textures.get("cards").getFrameNames();
 
@@ -64,17 +61,6 @@ export default class mainScene extends Phaser.Scene {
       console.log(respPlayer.isTurn);
       player.addHand(respPlayer.hand);
     });
-
-    // let card = this.add
-    //   .image(200, 500, "cards", cardFrames[1])
-    //   .setInteractive();
-
-    // card.on("pointerdown", () => {
-    //   console.log("you clicked the card");
-    // });
-    // this.input.on("pointerdown", () => {
-    //   console.log("hello world");
-    // });
   }
   update() {}
 }

@@ -1,3 +1,4 @@
+// TODO: add a destructor upon socket disconnect
 class GameLogic {
   constructor(io, socket, lobbies) {
     this.io = io;
@@ -44,7 +45,7 @@ class Dealer {
     while (cards.length) {
       let removedCard = cards.splice(Math.random() * cards.length, 1)[0];
 
-      if (players[playerIndex].hand.length < 13) {
+      if (players[playerIndex].hand.length < Dealer.MAX_CARDS) {
         players[playerIndex].hand.push(removedCard);
       }
 
