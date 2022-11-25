@@ -1,11 +1,8 @@
 "use strict";
 
-import { socket } from "./client.js";
-
 sessionStorage.clear();
 
-// TODO: highlight current user name upon lobby creation/joining
-// TODO: validation for joining full lobby
+import { MAX_PLAYERS, socket, MAX_LOBBY } from "./client.js";
 
 document.querySelector("#login_btn").addEventListener("click", () => {
   hide_content();
@@ -23,8 +20,7 @@ document.querySelector("#create_room_btn").addEventListener("click", () => {
 });
 
 // Joining public game
-// TODO: prevent joiners from joining a game that is inprogress.
-// TODO: when there are no lobbies, display "no rooms available to join"
+
 document.querySelector("#join_lobby_btn").addEventListener("click", () => {
   hide_content();
   document.querySelector(".join_lobby_screen").classList.remove("hide");
@@ -35,80 +31,123 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
 
     let lobbyList = document.querySelector("#lobbies-list");
 
-    // create li for each lobby
-    // TODO: make li look clickable using classes
-    for (let lobby of callback.lobbies) {
-      console.log(lobby);
-      let li = document.createElement("li");
-      li.id = lobby.id;
-      li.innerHTML = lobby.name;
+    if (callback.lobbies.length === 0 || callback.lobbies.length === null) {
+      document.querySelector("#lobbies-list").innerHTML =
+        "no more room available to join";
+    } else {
+      let lobbyNames = document.getElementById("lobbies-list");
+      while (lobbyNames.firstChild) {
+        lobbyNames.removeChild(lobbyNames.firstChild);
+      }
 
-      // on click join lobbies
-      li.onclick = () => {
-        // prompt username
-        let username = prompt("Please enter your username", "username");
+      for (let lobby of callback.lobbies) {
+        console.log(lobby);
 
-        // update the page with lobby information
-        hide_content();
-        document.querySelector(".public_lobby_screen").classList.remove("hide");
-        document.querySelector("#lobby_name").innerHTML = lobby.name;
+        let playerList = lobby.players.map(({ name }) => name);
 
-        // populate player list
-        let nextIl = 0;
-        for (let [index, player] of lobby.players.entries()) {
-          console.log(player);
-          document.querySelector("#p" + index).innerHTML = player.name;
-          nextIl += 1;
-        }
+        let li = document.createElement("li");
+        li.id = lobby.id;
+        li.innerHTML = `${lobby.name}   ${playerList.length}/${MAX_PLAYERS}`;
+        li.classList.add("hover");
 
-        document.querySelector("#p" + nextIl).innerHTML = username;
+        // on click join lobbies
+        //Check for existing names in the lobby before joining
+        li.onclick = () => {
+          if (playerList.length === MAX_PLAYERS) {
+            alert("LOBBY IS FULL");
+          } else {
+            const usernameCheck = () => {
+              let username = prompt("Please enter your username", "username");
+              if (username === undefined) {
+                return;
+              } else if (
+                !playerList.includes(username) &&
+                username.trim() !== ""
+              ) {
+                hide_content();
+                document
+                  .querySelector(".public_lobby_screen")
+                  .classList.remove("hide");
+                document.querySelector("#lobby_name").innerHTML = lobby.name;
 
-        // hide start game button for joiners
-        document.querySelector("#start_button").classList.add("hide");
+                // populate player list
+                let nextIl = 0;
+                for (let [index, player] of lobby.players.entries()) {
+                  console.log(player);
+                  document.querySelector("#p" + index).innerHTML = player.name;
+                  nextIl += 1;
+                }
 
-        // send joining player to server
-        socket.emit("lobby-join", username, lobby.id);
+                document.querySelector("#p" + nextIl).innerHTML = username;
 
-        sessionStorage.setItem("username", username);
-        sessionStorage.setItem("lobbyId", lobby.id);
-      };
+                // hide start game button for joiners
+                document.querySelector("#start_button").classList.add("hide");
 
-      lobbyList.appendChild(li);
+                // send joining player to server
+                socket.emit("lobby-join", username, lobby.id);
+
+                sessionStorage.setItem("username", username);
+                sessionStorage.setItem("lobbyId", lobby.id);
+
+                document.querySelector("#start_button").classList.add("hide");
+              } else {
+                alert("Username already taken, please choose another name");
+                usernameCheck();
+              }
+            };
+            usernameCheck();
+          }
+
+          // prompt username
+
+          // update the page with lobby information
+        };
+
+        lobbyList.appendChild(li);
+      }
     }
   });
 });
-
 // Lobby creation
-document.querySelector("#lobby_submit_btn").addEventListener("click", () => {
-  let selected = document.querySelector(
-    'input[name="user_lobby"]:checked'
-  ).value;
-  if (selected == "Public") {
-    hide_content();
-    document.querySelector(".public_lobby_screen").classList.remove("hide");
-  } else {
-    hide_content();
-    document.querySelector(".private_lobby_screen").classList.remove("hide");
-  }
+document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
+  e.preventDefault();
 
-  // TODO: Validation if fields are empty
-  // set character limits
-  let lobbyname = document.querySelector("#user_lobby_name").value;
-  let username = document.querySelector("#user_name").value;
+  //Max lobby Created
+  socket.emit("fetch-lobbies", (callback) => {
+    if (callback.lobbies.length >= MAX_LOBBY) {
+      alert("Max lobby created, Please join an existing room");
+    } else {
+      let selected = document.querySelector(
+        'input[name="user_lobby"]:checked'
+      ).value;
+      if (selected == "Public") {
+        hide_content();
+        document.querySelector(".public_lobby_screen").classList.remove("hide");
+      } else {
+        hide_content();
+        document
+          .querySelector(".private_lobby_screen")
+          .classList.remove("hide");
+      }
 
-  sessionStorage.setItem("username", username);
-  sessionStorage.setItem("lobbyId", "lobby-" + socket.id);
+      let lobbyname = document.querySelector("#user_lobby_name").value;
+      let username = document.querySelector("#user_name").value;
 
-  socket.emit("lobby-creation", lobbyname, username, (response) => {
-    console.log(response);
+      sessionStorage.setItem("username", username);
+      sessionStorage.setItem("lobbyId", "lobby-" + socket.id);
 
-    // update name: based on the
-    document.querySelector("#lobby_name").innerHTML = response.lobby.name;
+      socket.emit("lobby-creation", lobbyname, username, (response) => {
+        console.log(response);
 
-    // populate player list
-    for (let [index, player] of response.lobby.players.entries()) {
-      console.log(player);
-      document.querySelector("#p" + index).innerHTML = player.name;
+        // update name: based on the
+        document.querySelector("#lobby_name").innerHTML = response.lobby.name;
+
+        // populate player list
+        for (let [index, player] of response.lobby.players.entries()) {
+          console.log(player);
+          document.querySelector("#p" + index).innerHTML = player.name;
+        }
+      });
     }
   });
 });

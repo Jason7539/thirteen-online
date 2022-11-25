@@ -12,36 +12,35 @@ import { GameLogic } from "./gameLogic.js";
 const server = http.createServer(app);
 const io = new Server(server);
 const __dirname = path.resolve("./");
+const MAX_LOBBY = 3;
 
 app.use(express.static(path.join(__dirname, "src", "public")));
 
-// TODO set max allowed lobbies
 let lobbies = [];
-
-// TODO: future improvement, remove socket.io used to keep track of players -> generate unique id
+// HACK: future improvement, remove socket.io used to keep track of players -> generate unique id
 // how to keep better track of user disconnect
 
 io.on("connection", (socket) => {
-  console.log("a user connected:" + socket.id);
+  console.log("a user connected: " + socket.id);
+
+  //export lobbies
 
   new GameLogic(io, socket, lobbies).init();
 
   socket.on("disconnect", () => {
     console.log("a user disconnected:" + socket.id);
-
     // remove lobby when host disconnect
     let delRoomIndex = lobbies.findIndex((lobby) => lobby.hostId === socket.id);
 
     console.log("room index" + delRoomIndex);
     if (delRoomIndex > -1) {
-      // TODO:
-      // emit lobby deletion to all players
-
+      io.to(lobbies[delRoomIndex].id).emit("host-disconnect");
       // sockets disconnect from room(lobby) to be deleted
       io.of(lobbies[delRoomIndex].id).disconnectSockets(true);
 
       console.log("deleted room at index: " + delRoomIndex);
       lobbies.splice(delRoomIndex, 1);
+
       return;
     }
 
@@ -61,22 +60,24 @@ io.on("connection", (socket) => {
   });
 
   socket.on("lobby-creation", (lobbyname, username, callback) => {
-    console.log("created lobby name is : " + lobbyname);
+    if (lobbies.length < MAX_LOBBY) {
+      console.log("created lobby name is : " + lobbyname);
 
-    let lobby = new Lobby(lobbyname, socket.id).addPlayers(
-      new Player(socket.id, username)
-    );
-    lobbies.push(lobby);
+      let lobby = new Lobby(lobbyname, socket.id).addPlayers(
+        new Player(socket.id, username)
+      );
+      lobbies.push(lobby);
 
-    socket.join(lobby.id);
+      socket.join(lobby.id);
 
-    console.log(lobbies);
-    console.log(socket.rooms);
+      console.log(lobbies);
+      console.log(socket.rooms);
 
-    callback({
-      status: "ok",
-      lobby: lobby,
-    });
+      callback({
+        status: "ok",
+        lobby: lobby,
+      });
+    }
   });
 
   socket.on("lobby-join", (username, lobbyId) => {

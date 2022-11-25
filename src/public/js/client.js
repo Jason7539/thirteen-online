@@ -6,15 +6,16 @@ import initGame from "./game.js";
 var socket = io();
 
 const MAX_PLAYERS = 4;
+const MAX_LOBBY = 3;
 
 socket.on("update-lobby", (lobby) => {
   console.log("inside update-lobby");
 
-  // TODO: add classes to distinguish the current player's name
   for (let i = 0; i < MAX_PLAYERS; i++) {
     document.querySelector("#p" + i).innerHTML = lobby.players[i]
       ? lobby.players[i].name
       : "";
+    //document.querySelector()
   }
 });
 
@@ -22,4 +23,9 @@ socket.on("init-game", () => {
   initGame();
 });
 
-export { socket };
+socket.on("host-disconnect", () => {
+  alert("Host Disconnected: please join another lobby");
+  document.location.reload();
+});
+
+export { socket, MAX_PLAYERS, MAX_LOBBY };
