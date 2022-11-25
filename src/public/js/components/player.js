@@ -1,5 +1,6 @@
 export default class Player {
-  static pixelDisplacement = 10;
+  pixelheightDisplacement = 15;
+  cardWidthDifference = 30;
 
   constructor(scene) {
     this.scene = scene;
@@ -18,7 +19,7 @@ export default class Player {
   render(startX, startY) {
     let widthIncrement = 0;
     for (let card of this.hand) {
-      widthIncrement += 25;
+      widthIncrement += this.cardWidthDifference;
 
       let cardGameObj = this.scene.add
         .image(startX + widthIncrement, startY, "cards", card)
@@ -53,11 +54,11 @@ export default class Player {
   }
 
   selectedAnimation(gameObj) {
-    gameObj.y -= Player.pixelDisplacement;
+    gameObj.y -= this.pixelheightDisplacement;
   }
 
   deselectedAnimation(gameObj) {
-    gameObj.y += Player.pixelDisplacement;
+    gameObj.y += this.pixelheightDisplacement;
   }
 
   initEventData() {}
