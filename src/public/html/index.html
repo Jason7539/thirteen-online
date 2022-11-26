@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../css/index.css" />
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
     <title>Document</title>
   </head>
   <body>
@@ -141,7 +142,7 @@
         <h3>Public Lobby</h3>
         <h2 id="lobby_name"></h2>
 
-        <button id="host_button">Start Game</button>
+        <button id="start_button">Start Game</button>
         <ul>
           <li id="p0"></li>
           <li id="p1"></li>
@@ -165,7 +166,10 @@
       </div>
     </section>
 
+    <div id="gameRoom"></div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="../js/index.js"></script>
+    <script type="module" src="../js/game.js"></script>
   </body>
 </html>

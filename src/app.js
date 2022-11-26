@@ -7,6 +7,7 @@ import path from "path";
 import http from "http";
 import { Server } from "socket.io";
 import { Player, Lobby } from "./lobby.js";
+import { GameLogic } from "./gameLogic.js";
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -23,6 +24,8 @@ io.on("connection", (socket) => {
   console.log("a user connected: " + socket.id);
 
   //export lobbies
+
+  new GameLogic(io, socket, lobbies).init();
 
   socket.on("disconnect", () => {
     console.log("a user disconnected:" + socket.id);
@@ -93,6 +96,10 @@ io.on("connection", (socket) => {
     io.to(lobbyId).emit("update-lobby", lobbies[lobbyToJoinIndex]);
   });
 
+  socket.on("init-game", (lobbyId) => {
+    io.to(lobbyId).emit("init-game");
+  });
+
   // send all lobbies for joining players
   socket.on("fetch-lobbies", (callback) => {
     callback({
@@ -108,7 +115,6 @@ io.on("connection", (socket) => {
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "src", "public", "html", "index.html"));
-  //res.sendFile(__dirname + "/public/html/index.html");
 });
 
 server.listen(port, () => {

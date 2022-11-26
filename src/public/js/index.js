@@ -1,5 +1,7 @@
 "use strict";
 
+sessionStorage.clear();
+
 import { MAX_PLAYERS, socket, MAX_LOBBY } from "./client.js";
 
 document.querySelector("#login_btn").addEventListener("click", () => {
@@ -18,6 +20,7 @@ document.querySelector("#create_room_btn").addEventListener("click", () => {
 });
 
 // Joining public game
+
 document.querySelector("#join_lobby_btn").addEventListener("click", () => {
   hide_content();
   document.querySelector(".join_lobby_screen").classList.remove("hide");
@@ -78,10 +81,15 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
                 document.querySelector("#p" + nextIl).innerHTML = username;
 
                 // hide start game button for joiners
-                document.querySelector("#host_button").classList.add("hide");
+                document.querySelector("#start_button").classList.add("hide");
 
                 // send joining player to server
                 socket.emit("lobby-join", username, lobby.id);
+
+                sessionStorage.setItem("username", username);
+                sessionStorage.setItem("lobbyId", lobby.id);
+
+                document.querySelector("#start_button").classList.add("hide");
               } else {
                 alert("Username already taken, please choose another name");
                 usernameCheck();
@@ -125,6 +133,9 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
       let lobbyname = document.querySelector("#user_lobby_name").value;
       let username = document.querySelector("#user_name").value;
 
+      sessionStorage.setItem("username", username);
+      sessionStorage.setItem("lobbyId", "lobby-" + socket.id);
+
       socket.emit("lobby-creation", lobbyname, username, (response) => {
         console.log(response);
 
@@ -139,6 +150,11 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
       });
     }
   });
+});
+
+document.getElementById("start_button").addEventListener("click", () => {
+  socket.emit("init-game", sessionStorage.getItem("lobbyId"));
+  // TODO: hide create/join lobby on game start?
 });
 
 const hide_content = () => {

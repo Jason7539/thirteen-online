@@ -43,6 +43,8 @@ class Player {
   constructor(id, name) {
     this.id = id;
     this._name = name;
+    this.hand = [];
+    this.isTurn = false;
   }
 
   set name(name) {
@@ -57,6 +59,8 @@ class Player {
     return {
       name: this._name,
       id: this.id,
+      hand: this.hand,
+      isTurn: this.isTurn,
     };
   }
 }

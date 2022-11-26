@@ -1,5 +1,7 @@
 "use strict";
 
+import initGame from "./game.js";
+
 // eslint-disable-next-line no-undef
 var socket = io();
 
@@ -15,6 +17,10 @@ socket.on("update-lobby", (lobby) => {
       : "";
     //document.querySelector()
   }
+});
+
+socket.on("init-game", () => {
+  initGame();
 });
 
 socket.on("host-disconnect", () => {
