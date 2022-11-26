@@ -58,6 +58,9 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
           } else {
             const usernameCheck = () => {
               let username = prompt("Please enter your username", "username");
+
+              //send username to server
+
               if (username === undefined) {
                 return;
               } else if (
@@ -65,6 +68,7 @@ document.querySelector("#join_lobby_btn").addEventListener("click", () => {
                 username.trim() !== ""
               ) {
                 hide_content();
+
                 document
                   .querySelector(".public_lobby_screen")
                   .classList.remove("hide");
@@ -152,10 +156,50 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
   });
 });
 
-document.getElementById("start_button").addEventListener("click", () => {
-  socket.emit("init-game", sessionStorage.getItem("lobbyId"));
-  // TODO: hide create/join lobby on game start?
-});
+//chatBox
+
+const chatboxScreen = () => {
+  const chatForm = document.getElementById("chat-form");
+
+  chatForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    let message = e.target.elements.msg.value;
+
+    socket.emit("chat-message", message);
+
+    //clear input
+    e.target.elements.msg.value = "";
+    e.target.elements.msg.focus();
+  });
+
+  //logging Message into the chatbox
+  const chatMessages = document.querySelector(".chat-messages");
+
+  socket.on("message", (message) => {
+    console.log(message);
+    outputMessage(message);
+
+    // Scroll Down
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  document.getElementById("start_button").addEventListener("click", () => {
+    socket.emit("init-game", sessionStorage.getItem("lobbyId"));
+    // TODO: hide create/join lobby on game start?
+  });
+
+  //Output message
+  const outputMessage = (message) => {
+    const div = document.createElement("div");
+    div.classList.add("message");
+    div.innerHTML = `<p class="meta">Mary <span>${message.time}</span></p>
+<p class="text">
+  ${message.text}
+</p>`;
+    document.querySelector(".chat-messages").appendChild(div);
+  };
+};
 
 const hide_content = () => {
   document.querySelector(".private_lobby_screen").classList.add("hide");

@@ -8,6 +8,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { Player, Lobby } from "./lobby.js";
 import { GameLogic } from "./gameLogic.js";
+import { formatMessage } from "./message.js";
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -22,7 +23,6 @@ let lobbies = [];
 
 io.on("connection", (socket) => {
   console.log("a user connected: " + socket.id);
-
   //export lobbies
 
   new GameLogic(io, socket, lobbies).init();
@@ -111,6 +111,11 @@ io.on("connection", (socket) => {
   socket.on("lobby-deletion", () => {});
 
   socket.on("player-creation", () => {});
+
+  //ChatBox
+  socket.on("chat-message", (message) => {
+    io.emit("message", formatMessage("USER", message));
+  });
 });
 
 app.get("/", (req, res) => {

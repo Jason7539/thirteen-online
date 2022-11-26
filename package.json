@@ -20,6 +20,7 @@
   "homepage": "https://github.com/Jason7539/thirteen-online#readme",
   "dependencies": {
     "express": "^4.18.2",
+    "moment": "^2.29.4",
     "socket.io": "^4.5.3"
   },
   "devDependencies": {

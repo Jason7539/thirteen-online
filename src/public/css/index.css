@@ -66,3 +66,45 @@ nav {
   color: gray;
   font-weight: bold;
 }
+
+/*ChatBox Css*/
+
+.chat-container {
+  max-width: 600px;
+  background: bisque;
+  margin: 200px auto;
+  overflow: hidden;
+}
+
+.chat-messages {
+  padding: 30px;
+  max-height: 500px;
+  overflow-y: scroll;
+}
+
+.chat-messages .message {
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: whitesmoke;
+  border-radius: 5px;
+}
+
+.chat-messages .message .meta span {
+  color: #777;
+}
+
+.chat-form-container {
+  padding: 20px 30px;
+  background-color: gray;
+}
+
+.chat-form-container form {
+  display: flex;
+}
+
+.chat-form-container input[type="text"] {
+  font-size: 16px;
+  padding: 5px;
+  height: 40px;
+  flex: 1;
+}
