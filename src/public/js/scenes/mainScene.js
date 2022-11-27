@@ -1,4 +1,4 @@
-import { Player } from "../components/player.js";
+import Player from "../components/player.js";
 import { socket } from "../client.js";
 
 // eslint-disable-next-line no-undef
@@ -28,9 +28,11 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(900, 540, "pass_button").setInteractive();
-    this.add.image(1100, 540, "play_button").setInteractive();
-    let player = new Player(this);
+    let passButton = this.add.image(900, 540, "pass_button").setInteractive();
+    let playButton = this.add.image(1100, 540, "play_button").setInteractive();
+
+    let player = new Player(this, passButton, playButton);
+    // player.disableButtons();
 
     let cardFrames = this.textures.get("cards").getFrameNames();
 
@@ -60,6 +62,11 @@ export default class mainScene extends Phaser.Scene {
       console.log(respPlayer.hand);
       console.log(respPlayer.isTurn);
       player.addHand(respPlayer.hand);
+    });
+
+    socket.on("isTurn", (lastPlayed) => {
+      player.lastPlayed = lastPlayed;
+      player.enableButtons();
     });
   }
   update() {}

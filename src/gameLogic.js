@@ -19,10 +19,23 @@ class GameLogic {
       for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === "spades3")) {
           player.isTurn = true;
+          // emit is turn for that player/ enable buttons and last played card for player
+
+          let lastPlayed = {
+            repitition: 0,
+            sequence: 0,
+            card: "",
+          };
+          this.io.to(player.id).emit("isTurn", lastPlayed);
         }
         this.io.to(player.id).emit("delt-cards", player);
       }
     });
+
+    // this.socket.on("play-card", (lobbyId, lastPlayed) => {
+    //   // emit latPlayed to everyone
+    //   this.io.to(lobbyId).emit("last-played", lastPlayed);
+    // });
   }
 }
 

@@ -1,3 +1,5 @@
+import { socket } from "../client.js";
+
 export default class Player {
   pixelheightDisplacement = 15;
   cardWidthDifference = 30;
@@ -5,11 +7,16 @@ export default class Player {
   handXorigin = 200;
   handYorigin = 500;
 
-  constructor(scene) {
+  lastPlayed = {};
+  validSelection = false;
+
+  constructor(scene, passButton, playButton) {
     this.scene = scene;
     this.hand = [];
     this.cardSelected = [];
     this.handGameObjects = [];
+    this.passButton = passButton;
+    this.playButton = playButton;
   }
 
   // addHand will call render. registerEvents and register data
@@ -36,6 +43,8 @@ export default class Player {
       let cardGameObj = this.scene.add
         .image(startX + widthIncrement, startY, "cards", card)
         .setName(card)
+        .setData("faceValue", PlayerHelper.calcFaceValue(card))
+        .setData("suitValue", PlayerHelper.calcSuitValue(card))
         .setInteractive();
 
       this.handGameObjects.push(cardGameObj);
@@ -58,6 +67,9 @@ export default class Player {
           );
           this.cardSelected.splice(remIndex, 1);
 
+          this.cardSelected.sort(this.gameObjectCompare);
+          this.updateSelectedValidation();
+
           this.deselectedAnimation(card);
 
           console.log(this.cardSelected.length);
@@ -65,25 +77,70 @@ export default class Player {
           console.log(card);
           this.cardSelected.push(card);
 
+          this.cardSelected.sort(this.gameObjectCompare);
+          this.updateSelectedValidation();
+
           this.selectedAnimation(card);
         }
       });
     }
   }
 
-  initGameData(handGameObjects) {
-    for (let gameObjects of handGameObjects) {
-      let cardFrameName = gameObjects.name;
-      gameObjects.setData(
-        "faceValue",
-        PlayerHelper.calcFaceValue(cardFrameName)
-      );
-      gameObjects.setData(
-        "suitValue",
-        PlayerHelper.calcSuitValue(cardFrameName)
-      );
+  gameObjectCompare(gameObjA, gameObjB) {
+    if (gameObjA.getData("faceValue") === gameObjB.getData("faceValue")) {
+      return gameObjA.getData("suitValue") - gameObjB.getData("suitValue");
+    } else {
+      return gameObjA.getData("faceValue") - gameObjB.getData("faceValue");
     }
   }
+
+  updateSelectedValidation() {
+    // first turn/free turn
+    if (this.lastPlayed.card === "") {
+      this.validSelection =
+        PlayerHelper.calcRepitionCount(this.cardSelected) >= 1 &&
+        PlayerHelper.calcSequenceCount(this.cardSelected) >= 1 &&
+        PlayerHelper.calcSequenceCount(this.cardSelected) != 2 &&
+        PlayerHelper.isSequential(this.cardSelected);
+    } else {
+      // we have to look at the last played to tell whether it is valid or not
+    }
+  }
+
+  disableButtons() {
+    this.playButton.setVisible(false);
+    this.passButton.setVisible(false);
+
+    // make button not interactive
+  }
+
+  enableButtons() {
+    // set button visible and allow them to be interactive
+    this.playButton.setVisible(true);
+    this.passButton.setVisible(true);
+    this.addButtonEvents();
+  }
+
+  addButtonEvents() {
+    this.playButton.on("pointerdown", () => {
+      // If it's a valid selection we emit play card to server
+      // and we update the player hand
+
+      if (this.validSelection) {
+        alert(this.validSelection);
+
+        let lastPlayed = {
+          repitition: PlayerHelper.calcRepitionCount(this.cardSelected),
+          sequence: PlayerHelper.calcSequenceCount(this.cardSelected),
+          card: this.cardSelected[this.cardSelected.length - 1],
+        };
+        this.socket.emit("play-card");
+      } else {
+        alert("not a valid play");
+      }
+    });
+  }
+  removeButtonEvents() {}
 
   selectedAnimation(gameObj) {
     gameObj.y -= this.pixelheightDisplacement;
@@ -146,9 +203,9 @@ class PlayerHelper {
   static calcSequenceCount(handGameObjects) {
     let faceValues = [];
     for (let handGameObject of handGameObjects) {
-      // faceValues.push(handGameObject.get("faceValue"));
+      faceValues.push(handGameObject.getData("faceValue"));
 
-      faceValues.push(handGameObject.faceValue);
+      //faceValues.push(handGameObject.faceValue);
     }
 
     // remove duplicates
@@ -160,9 +217,9 @@ class PlayerHelper {
     // put all the face values in an array
     let faceValues = [];
     for (let handGameObject of handGameObjects) {
-      // faceValues.push(handGameObject.get("faceValue"));
+      faceValues.push(handGameObject.getData("faceValue"));
 
-      faceValues.push(handGameObject.faceValue);
+      // faceValues.push(handGameObject.faceValue);
     }
 
     // remove duplcate values from faceValues
@@ -185,8 +242,8 @@ class PlayerHelper {
 
     // Populate dupes object
     for (let card of handGameObjects) {
-      //let cardFaceValue = card.getData("faceValue");
-      let cardFaceValue = card.faceValue;
+      let cardFaceValue = card.getData("faceValue");
+      // let cardFaceValue = card.faceValue;
 
       if (cardFaceValue in dupes) {
         dupes[cardFaceValue] += 1;
