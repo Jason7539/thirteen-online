@@ -1,4 +1,4 @@
-import Player from "../components/player.js";
+import { Player } from "../components/player.js";
 import { socket } from "../client.js";
 
 // eslint-disable-next-line no-undef
