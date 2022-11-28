@@ -95,8 +95,8 @@ export default class Player {
   }
 
   updateSelectedValidation() {
-    // first turn/free turn
-    if (this.lastPlayed.card === "") {
+    // first turn/free turn = highestCard is blank
+    if (this.lastPlayed.highestCard === "") {
       this.validSelection =
         PlayerHelper.calcRepitionCount(this.cardSelected) >= 1 &&
         PlayerHelper.calcSequenceCount(this.cardSelected) >= 1 &&
@@ -104,6 +104,28 @@ export default class Player {
         PlayerHelper.isSequential(this.cardSelected);
     } else {
       // we have to look at the last played to tell whether it is valid or not
+      this.validSelection =
+        this.lastPlayed.repitition ===
+          PlayerHelper.calcRepitionCount(this.cardSelected) &&
+        this.lastPlayed.sequence ===
+          PlayerHelper.calcSequenceCount(this.cardSelected) &&
+        // Test if the selections highest card is greater than the last played highest card if they equal then compare suits
+        PlayerHelper.calcFaceValue(this.lastPlayed.highestCard) <
+          PlayerHelper.calcFaceValue(
+            this.cardSelected[this.cardSelected.length - 1]
+          )
+          ? true
+          : PlayerHelper.calcFaceValue(this.lastPlayed.highestCard) ===
+            PlayerHelper.calcFaceValue(
+              this.cardSelected[this.cardSelected.length - 1]
+            )
+          ? PlayerHelper.calcSuitValue(this.lastPlayed.highestCard) <
+            PlayerHelper.calcSuitValue(
+              this.cardSelected[this.cardSelected.length - 1]
+            )
+            ? true
+            : false
+          : false;
     }
   }
 
@@ -132,9 +154,24 @@ export default class Player {
         let lastPlayed = {
           repitition: PlayerHelper.calcRepitionCount(this.cardSelected),
           sequence: PlayerHelper.calcSequenceCount(this.cardSelected),
-          card: this.cardSelected[this.cardSelected.length - 1],
+          highestCard: this.cardSelected[this.cardSelected.length - 1].name,
+          cardsPlayed: this.cardSelected.map((gameObj) => gameObj.name),
         };
-        this.socket.emit("play-card");
+        socket.emit("play-card", sessionStorage.getItem("lobbyId"), lastPlayed);
+
+        // Update hand to remove selected cards
+        this.hand = this.hand.filter((cardFrameName) => {
+          return !this.cardSelected
+            .map((obj) => obj.name)
+            .includes(cardFrameName);
+        });
+
+        alert("new hand is: " + JSON.stringify(this.hand));
+        this.destroyHandGameObjects();
+        this.handGameObjects = [];
+        this.cardSelected = [];
+        // Delete all card images
+        this.render(this.handXorigin, this.handYorigin);
       } else {
         alert("not a valid play");
       }

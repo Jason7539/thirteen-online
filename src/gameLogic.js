@@ -24,7 +24,8 @@ class GameLogic {
           let lastPlayed = {
             repitition: 0,
             sequence: 0,
-            card: "",
+            highestCard: "",
+            cardsPlayed: [],
           };
           this.io.to(player.id).emit("isTurn", lastPlayed);
         }
@@ -32,10 +33,14 @@ class GameLogic {
       }
     });
 
-    // this.socket.on("play-card", (lobbyId, lastPlayed) => {
-    //   // emit latPlayed to everyone
-    //   this.io.to(lobbyId).emit("last-played", lastPlayed);
-    // });
+    this.socket.on("play-card", (lobbyId, lastPlayed) => {
+      // emit latPlayed to everyone
+      console.log("just played: " + JSON.stringify(lastPlayed));
+      this.io.to(lobbyId).emit("last-played", lastPlayed);
+
+      // send isTurn to the next player
+      // have an inner array for the current round of players
+    });
   }
 }
 

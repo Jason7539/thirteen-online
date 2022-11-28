@@ -64,9 +64,17 @@ export default class mainScene extends Phaser.Scene {
       player.addHand(respPlayer.hand);
     });
 
+    // Unhide buttons/ enable buttons. allow player to test selection
     socket.on("isTurn", (lastPlayed) => {
+      alert("your turn");
       player.lastPlayed = lastPlayed;
       player.enableButtons();
+    });
+
+    // update last-played card
+    socket.on("last-played", (lastPlayed) => {
+      // update the last played
+      console.log("someone played:" + JSON.stringify(lastPlayed));
     });
   }
   update() {}
