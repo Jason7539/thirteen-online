@@ -96,13 +96,16 @@ export default class Player {
 
   updateSelectedValidation() {
     // first turn/free turn = highestCard is blank
-    if (this.lastPlayed.highestCard === "") {
+    if (!this.cardSelected.length) {
+      this.validSelection = false;
+    } else if (this.lastPlayed.highestCard === "") {
       this.validSelection =
         PlayerHelper.calcRepitionCount(this.cardSelected) >= 1 &&
         PlayerHelper.calcSequenceCount(this.cardSelected) >= 1 &&
         PlayerHelper.calcSequenceCount(this.cardSelected) != 2 &&
         PlayerHelper.isSequential(this.cardSelected);
     } else {
+      console.log(JSON.stringify(this.cardSelected.map((obj) => obj.name)));
       // we have to look at the last played to tell whether it is valid or not
       this.validSelection =
         this.lastPlayed.repitition ===
@@ -112,16 +115,16 @@ export default class Player {
         // Test if the selections highest card is greater than the last played highest card if they equal then compare suits
         PlayerHelper.calcFaceValue(this.lastPlayed.highestCard) <
           PlayerHelper.calcFaceValue(
-            this.cardSelected[this.cardSelected.length - 1]
+            this.cardSelected[this.cardSelected.length - 1].name
           )
           ? true
           : PlayerHelper.calcFaceValue(this.lastPlayed.highestCard) ===
             PlayerHelper.calcFaceValue(
-              this.cardSelected[this.cardSelected.length - 1]
+              this.cardSelected[this.cardSelected.length - 1].name
             )
           ? PlayerHelper.calcSuitValue(this.lastPlayed.highestCard) <
             PlayerHelper.calcSuitValue(
-              this.cardSelected[this.cardSelected.length - 1]
+              this.cardSelected[this.cardSelected.length - 1].name
             )
             ? true
             : false
@@ -130,9 +133,9 @@ export default class Player {
   }
 
   disableButtons() {
-    this.playButton.setVisible(false);
-    this.passButton.setVisible(false);
-
+    // this.playButton.setVisible(false);
+    // this.passButton.setVisible(false);
+    this.removeButtonEvents();
     // make button not interactive
   }
 
@@ -166,18 +169,22 @@ export default class Player {
             .includes(cardFrameName);
         });
 
-        alert("new hand is: " + JSON.stringify(this.hand));
         this.destroyHandGameObjects();
         this.handGameObjects = [];
         this.cardSelected = [];
         // Delete all card images
         this.render(this.handXorigin, this.handYorigin);
+        this.registerEvents();
+
+        this.disableButtons();
       } else {
         alert("not a valid play");
       }
     });
   }
-  removeButtonEvents() {}
+  removeButtonEvents() {
+    this.playButton.off("pointerdown");
+  }
 
   selectedAnimation(gameObj) {
     gameObj.y -= this.pixelheightDisplacement;

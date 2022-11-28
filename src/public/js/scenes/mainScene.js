@@ -39,7 +39,7 @@ export default class mainScene extends Phaser.Scene {
   }
 
   destroyLastPlayed() {
-    for (let gameObj in this.lastPlayedGameObjects) {
+    for (let gameObj of this.lastPlayedGameObjects) {
       gameObj.destroy();
     }
     this.lastPlayedGameObjects = [];

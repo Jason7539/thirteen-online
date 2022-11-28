@@ -8,6 +8,8 @@ class Lobby {
     this._id = "lobby-" + id;
     this._hostId = id;
     this.players = [];
+    this.playersInRound = [];
+    this.currentPlayerIndex = 0;
   }
 
   addPlayers(player) {

@@ -9,6 +9,7 @@ class GameLogic {
   init() {
     this.socket.on("deal-cards", (lobbyId, cards) => {
       let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+      currentLobby.playersInRound = currentLobby.players;
 
       let shuffledCards = Dealer.shuffleCards(cards);
       currentLobby.players = Dealer.dealCards(
@@ -16,6 +17,11 @@ class GameLogic {
         shuffledCards
       );
 
+      let names = currentLobby.playersInRound.map((player) => player.name);
+      console.log("Players in the current round is: " + JSON.stringify(names));
+
+      // TODO: update the first players turn the case spade3 is not delt players < 4
+      //Find the first Players turn. start if they have spade3
       for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === "spades3")) {
           player.isTurn = true;
@@ -28,6 +34,11 @@ class GameLogic {
             cardsPlayed: [],
           };
           this.io.to(player.id).emit("isTurn", lastPlayed);
+
+          currentLobby.currentPlayerIndex =
+            currentLobby.playersInRound.findIndex(
+              (elm) => elm.id === player.id
+            );
         }
         this.io.to(player.id).emit("delt-cards", player);
       }
@@ -36,10 +47,20 @@ class GameLogic {
     this.socket.on("play-card", (lobbyId, lastPlayed) => {
       // emit latPlayed to everyone
       console.log("just played: " + JSON.stringify(lastPlayed));
+
+      // sends last played. so all clients renders the most recent played card
       this.io.to(lobbyId).emit("last-played", lastPlayed);
 
       // send isTurn to the next player
       // have an inner array for the current round of players
+      let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+
+      currentLobby.currentPlayerIndex += 1;
+      currentLobby.currentPlayerIndex %= currentLobby.playersInRound.length;
+      console.log("next turn is :" + currentLobby.currentPlayerIndex);
+      let newPlayerTurn =
+        currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+      this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
     });
   }
 }
