@@ -9,7 +9,9 @@ class GameLogic {
   init() {
     this.socket.on("deal-cards", (lobbyId, cards) => {
       let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
-      currentLobby.playersInRound = currentLobby.players;
+      currentLobby.playersInRound = JSON.parse(
+        JSON.stringify(currentLobby.players)
+      );
 
       let shuffledCards = Dealer.shuffleCards(cards);
       currentLobby.players = Dealer.dealCards(
@@ -61,6 +63,76 @@ class GameLogic {
       let newPlayerTurn =
         currentLobby.playersInRound[currentLobby.currentPlayerIndex];
       this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+    });
+
+    this.socket.on("pass-button", (lobbyId, lastPlayed) => {
+      // remove current player from players in that round
+      let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+
+      currentLobby.playersInRound.splice(currentLobby.currentPlayerIndex, 1);
+      console.log(
+        "current players are: ",
+        currentLobby.playersInRound.map((p) => p.name)
+      );
+
+      currentLobby.currentPlayerIndex =
+        currentLobby.currentPlayerIndex % currentLobby.playersInRound.length;
+      console.log("the next index is ", currentLobby.currentPlayerIndex);
+
+      if (currentLobby.playersInRound.length === 1) {
+        let freePlay = {
+          repitition: 0,
+          sequence: 0,
+          highestCard: "",
+          cardsPlayed: [],
+        };
+
+        this.io
+          .to(currentLobby.playersInRound[currentLobby.currentPlayerIndex].id)
+          .emit("isTurn", freePlay);
+
+        let playersBefore = [];
+        let isAfter = false;
+        // reset all the players in the round
+
+        for (let player of currentLobby.players) {
+          if (
+            player.id ===
+            currentLobby.playersInRound[currentLobby.currentPlayerIndex].id
+          ) {
+            isAfter = true;
+            continue;
+          }
+          if (!isAfter) {
+            playersBefore.push(JSON.parse(JSON.stringify(player)));
+          } else {
+            currentLobby.playersInRound.push(
+              JSON.parse(JSON.stringify(player))
+            );
+          }
+        }
+
+        let currentPlayer =
+          currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+
+        currentLobby.playersInRound = playersBefore.concat(
+          currentLobby.playersInRound
+        );
+        console.log(
+          "round rest is now: ",
+          currentLobby.playersInRound.map((p) => p.name)
+        );
+
+        currentLobby.currentPlayerIndex = currentLobby.players.findIndex(
+          (p) => p.id === currentPlayer.id
+        );
+        console.log("next updated player at ", currentLobby.currentPlayerIndex);
+      } else {
+        // emit next turn to the next player
+        let newPlayerTurn =
+          currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+        this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+      }
     });
   }
 }

@@ -181,9 +181,20 @@ export default class Player {
         alert("not a valid play");
       }
     });
+
+    this.passButton.on("pointerdown", () => {
+      socket.emit(
+        "pass-button",
+        sessionStorage.getItem("lobbyId"),
+        this.lastPlayed
+      );
+
+      this.disableButtons();
+    });
   }
   removeButtonEvents() {
     this.playButton.off("pointerdown");
+    this.passButton.off("pointerdown");
   }
 
   selectedAnimation(gameObj) {
