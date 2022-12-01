@@ -94,6 +94,8 @@ export default class Player {
     }
   }
 
+  // TODO: ensure first player has to play spade3
+  // TODO: handle when spade3 doesn't exists in game
   updateSelectedValidation() {
     // first turn/free turn = highestCard is blank
     if (!this.cardSelected.length) {
@@ -148,9 +150,6 @@ export default class Player {
 
   addButtonEvents() {
     this.playButton.on("pointerdown", () => {
-      // If it's a valid selection we emit play card to server
-      // and we update the player hand
-
       if (this.validSelection) {
         alert(this.validSelection);
 
@@ -172,7 +171,7 @@ export default class Player {
         this.destroyHandGameObjects();
         this.handGameObjects = [];
         this.cardSelected = [];
-        // Delete all card images
+
         this.render(this.handXorigin, this.handYorigin);
         this.registerEvents();
 
@@ -269,12 +268,9 @@ class PlayerHelper {
   }
 
   static isSequential(handGameObjects) {
-    // put all the face values in an array
     let faceValues = [];
     for (let handGameObject of handGameObjects) {
       faceValues.push(handGameObject.getData("faceValue"));
-
-      // faceValues.push(handGameObject.faceValue);
     }
 
     // remove duplcate values from faceValues
