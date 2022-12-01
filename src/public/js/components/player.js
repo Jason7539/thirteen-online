@@ -133,16 +133,16 @@ export default class Player {
   }
 
   disableButtons() {
-    // this.playButton.setVisible(false);
-    // this.passButton.setVisible(false);
+    this.playButton.setVisible(false);
+    this.passButton.setVisible(false);
+
     this.removeButtonEvents();
-    // make button not interactive
   }
 
   enableButtons() {
-    // set button visible and allow them to be interactive
     this.playButton.setVisible(true);
     this.passButton.setVisible(true);
+
     this.addButtonEvents();
   }
 

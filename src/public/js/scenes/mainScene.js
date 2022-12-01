@@ -61,7 +61,7 @@ export default class mainScene extends Phaser.Scene {
     let playButton = this.add.image(1100, 540, "play_button").setInteractive();
 
     let player = new Player(this, passButton, playButton);
-    // player.disableButtons();
+    player.disableButtons();
 
     let cardFrames = this.textures.get("cards").getFrameNames();
 
