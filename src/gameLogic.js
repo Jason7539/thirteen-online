@@ -9,6 +9,9 @@ class GameLogic {
   init() {
     this.socket.on("deal-cards", (lobbyId, cards) => {
       let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+      currentLobby.playersInRound = JSON.parse(
+        JSON.stringify(currentLobby.players)
+      );
 
       let shuffledCards = Dealer.shuffleCards(cards);
       currentLobby.players = Dealer.dealCards(
@@ -16,11 +19,119 @@ class GameLogic {
         shuffledCards
       );
 
+      let names = currentLobby.playersInRound.map((player) => player.name);
+      console.log("Players in the current round is: " + JSON.stringify(names));
+
+      // TODO: update the first players turn the case spade3 is not delt players < 4
+      //Find the first Players turn. start if they have spade3
       for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === "spades3")) {
           player.isTurn = true;
+          // emit is turn for that player/ enable buttons and last played card for player
+
+          let lastPlayed = {
+            repitition: 0,
+            sequence: 0,
+            highestCard: "",
+            cardsPlayed: [],
+          };
+          this.io.to(player.id).emit("isTurn", lastPlayed);
+
+          currentLobby.currentPlayerIndex =
+            currentLobby.playersInRound.findIndex(
+              (elm) => elm.id === player.id
+            );
         }
         this.io.to(player.id).emit("delt-cards", player);
+      }
+    });
+
+    this.socket.on("play-card", (lobbyId, lastPlayed) => {
+      // emit latPlayed to everyone
+      console.log("just played: " + JSON.stringify(lastPlayed));
+
+      // sends last played. so all clients renders the most recent played card
+      this.io.to(lobbyId).emit("last-played", lastPlayed);
+
+      // send isTurn to the next player
+      // have an inner array for the current round of players
+      let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+
+      currentLobby.currentPlayerIndex += 1;
+      currentLobby.currentPlayerIndex %= currentLobby.playersInRound.length;
+      console.log("next turn is :" + currentLobby.currentPlayerIndex);
+      let newPlayerTurn =
+        currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+      this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+    });
+
+    this.socket.on("pass-button", (lobbyId, lastPlayed) => {
+      // remove current player from players in that round
+      let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+
+      currentLobby.playersInRound.splice(currentLobby.currentPlayerIndex, 1);
+      console.log(
+        "current players are: ",
+        currentLobby.playersInRound.map((p) => p.name)
+      );
+
+      currentLobby.currentPlayerIndex =
+        currentLobby.currentPlayerIndex % currentLobby.playersInRound.length;
+      console.log("the next index is ", currentLobby.currentPlayerIndex);
+
+      if (currentLobby.playersInRound.length === 1) {
+        let freePlay = {
+          repitition: 0,
+          sequence: 0,
+          highestCard: "",
+          cardsPlayed: [],
+        };
+
+        this.io
+          .to(currentLobby.playersInRound[currentLobby.currentPlayerIndex].id)
+          .emit("isTurn", freePlay);
+
+        let playersBefore = [];
+        let isAfter = false;
+        // reset all the players in the round
+
+        for (let player of currentLobby.players) {
+          if (
+            player.id ===
+            currentLobby.playersInRound[currentLobby.currentPlayerIndex].id
+          ) {
+            isAfter = true;
+            continue;
+          }
+          if (!isAfter) {
+            playersBefore.push(JSON.parse(JSON.stringify(player)));
+          } else {
+            currentLobby.playersInRound.push(
+              JSON.parse(JSON.stringify(player))
+            );
+          }
+        }
+
+        let currentPlayer =
+          currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+
+        currentLobby.playersInRound = playersBefore.concat(
+          currentLobby.playersInRound
+        );
+        console.log(
+          "round rest is now: ",
+          currentLobby.playersInRound.map((p) => p.name)
+        );
+
+        currentLobby.currentPlayerIndex = currentLobby.players.findIndex(
+          (p) => p.id === currentPlayer.id
+        );
+        console.log("next updated player at ", currentLobby.currentPlayerIndex);
+      } else {
+        // emit next turn to the next player
+        let newPlayerTurn =
+          currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+        this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
       }
     });
   }

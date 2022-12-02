@@ -3,6 +3,10 @@ import { socket } from "../client.js";
 
 // eslint-disable-next-line no-undef
 export default class mainScene extends Phaser.Scene {
+  lastPlayedXorigin = 550;
+  lastPlayedYorigin = 250;
+  cardWidthDifference = 30;
+
   constructor() {
     super({
       key: "Game",
@@ -14,6 +18,31 @@ export default class mainScene extends Phaser.Scene {
         ? true
         : false;
     });
+
+    this.lastPlayedCardFrames = [];
+    this.lastPlayedGameObjects = [];
+  }
+
+  renderLastPlayed() {
+    let widthIncrement = 0;
+    for (let card of this.lastPlayedCardFrames) {
+      widthIncrement += this.cardWidthDifference;
+      this.lastPlayedGameObjects.push(
+        this.add.image(
+          this.lastPlayedXorigin + widthIncrement,
+          this.lastPlayedYorigin,
+          "cards",
+          card
+        )
+      );
+    }
+  }
+
+  destroyLastPlayed() {
+    for (let gameObj of this.lastPlayedGameObjects) {
+      gameObj.destroy();
+    }
+    this.lastPlayedGameObjects = [];
   }
 
   preload() {
@@ -28,9 +57,11 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(900, 540, "pass_button").setInteractive();
-    this.add.image(1100, 540, "play_button").setInteractive();
-    let player = new Player(this);
+    let passButton = this.add.image(900, 540, "pass_button").setInteractive();
+    let playButton = this.add.image(1100, 540, "play_button").setInteractive();
+
+    let player = new Player(this, passButton, playButton);
+    player.disableButtons();
 
     let cardFrames = this.textures.get("cards").getFrameNames();
 
@@ -60,6 +91,25 @@ export default class mainScene extends Phaser.Scene {
       console.log(respPlayer.hand);
       console.log(respPlayer.isTurn);
       player.addHand(respPlayer.hand);
+    });
+
+    // Unhide buttons/ enable buttons
+    socket.on("isTurn", (lastPlayed) => {
+      alert("your turn");
+      player.lastPlayed = lastPlayed;
+      player.enableButtons();
+    });
+
+    // update last-played card
+    socket.on("last-played", (lastPlayed) => {
+      // Render the most recent played cards in the middle
+      player.lastPlayed = lastPlayed;
+
+      this.lastPlayedCardFrames = lastPlayed.cardsPlayed;
+      this.destroyLastPlayed();
+      this.renderLastPlayed();
+
+      console.log("someone played:" + JSON.stringify(lastPlayed));
     });
   }
   update() {}
