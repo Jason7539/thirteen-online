@@ -1,3 +1,4 @@
+import PlayerHelper from "./public/js/components/playerHelper.js";
 // TODO: add a destructor upon socket disconnect
 class GameLogic {
   constructor(io, socket, lobbies) {
@@ -22,10 +23,11 @@ class GameLogic {
       let names = currentLobby.playersInRound.map((player) => player.name);
       console.log("Players in the current round is: " + JSON.stringify(names));
 
-      // TODO: update the first players turn the case spade3 is not delt players < 4
-      //Find the first Players turn. start if they have spade3
+      // Get the lowest delt card and set that player's turn
+      let lowestCard = Dealer.getLowestCard(currentLobby.players);
+
       for (let player of currentLobby.players) {
-        if (player.hand.find((card) => card === "spades3")) {
+        if (player.hand.find((card) => card === lowestCard)) {
           player.isTurn = true;
           // emit is turn for that player/ enable buttons and last played card for player
 
@@ -148,6 +150,11 @@ class Dealer {
       cards[j] = temp;
     }
     return cards;
+  }
+
+  static getLowestCard(players) {
+    let cardsInPlay = players.map((player) => player.hand).flat();
+    return PlayerHelper.getLowestCard(cardsInPlay);
   }
 
   static dealCards(players, cards) {
