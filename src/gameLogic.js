@@ -23,6 +23,10 @@ class GameLogic {
       let names = currentLobby.playersInRound.map((player) => player.name);
       console.log("Players in the current round is: " + JSON.stringify(names));
 
+      currentLobby.players.forEach((player) =>
+        this.io.to(player.id).emit("delt-cards", player)
+      );
+
       // Get the lowest delt card and set that player's turn
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
 
@@ -45,7 +49,6 @@ class GameLogic {
               (elm) => elm.id === player.id
             );
         }
-        this.io.to(player.id).emit("delt-cards", player);
       }
     });
 

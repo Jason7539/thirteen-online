@@ -97,6 +97,7 @@ export default class mainScene extends Phaser.Scene {
     socket.on("isTurn", (lastPlayed) => {
       alert("your turn");
       player.lastPlayed = lastPlayed;
+      player.registerEvents();
       player.enableButtons();
     });
 
