@@ -95,8 +95,6 @@ export default class Player {
     }
   }
 
-  // TODO: ensure first player has to play spade3
-  // TODO: handle when spade3 doesn't exists in game
   updateSelectedValidation() {
     // first turn/free turn = highestCard is blank
     if (!this.cardSelected.length) {
