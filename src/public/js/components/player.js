@@ -133,6 +133,14 @@ export default class Player {
             : false
           : false;
     }
+
+    if (this.lastPlayed.requiredCard) {
+      this.validSelection =
+        this.validSelection &&
+        this.cardSelected
+          .map((gameObject) => gameObject.name)
+          .includes(this.lastPlayed.requiredCard);
+    }
   }
 
   disableButtons() {
@@ -183,6 +191,8 @@ export default class Player {
     });
 
     this.passButton.on("pointerdown", () => {
+      delete this.lastPlayed.requiredCard;
+
       socket.emit(
         "pass-button",
         sessionStorage.getItem("lobbyId"),

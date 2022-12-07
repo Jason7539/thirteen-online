@@ -36,6 +36,7 @@ class GameLogic {
             sequence: 0,
             highestCard: "",
             cardsPlayed: [],
+            requiredCard: lowestCard,
           };
           this.io.to(player.id).emit("isTurn", lastPlayed);
 
