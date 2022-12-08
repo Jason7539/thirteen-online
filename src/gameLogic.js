@@ -45,7 +45,7 @@ class GameLogic {
               (elm) => elm.id === player.id
             );
         }
-        this.io.to(player.id).emit("delt-cards", player);
+        this.io.to(player.id).emit("delt-cards", player, currentLobby.players);
       }
     });
 

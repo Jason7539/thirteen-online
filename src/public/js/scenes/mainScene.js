@@ -1,5 +1,6 @@
 import Player from "../components/player.js";
 import { socket } from "../client.js";
+import OtherPlayers from "../components/otherPlayers.js";
 
 // eslint-disable-next-line no-undef
 export default class mainScene extends Phaser.Scene {
@@ -52,6 +53,11 @@ export default class mainScene extends Phaser.Scene {
       "../../assets/cards.json"
     );
 
+    this.load.image("catIcon0", "../../assets/catIcon0.png");
+    this.load.image("catIcon1", "../../assets/catIcon1.png");
+    this.load.image("catIcon2", "../../assets/catIcon2.png");
+    this.load.image("catIcon3", "../../assets/catIcon3.png");
+
     this.load.image("pass_button", "../../assets/pass_button.png");
     this.load.image("play_button", "../../assets/play_button.png");
   }
@@ -87,10 +93,20 @@ export default class mainScene extends Phaser.Scene {
     }
 
     // Init each players hand after host selects deal
-    socket.on("delt-cards", (respPlayer) => {
+    socket.on("delt-cards", (respPlayer, currentLobby) => {
+      let otherPlayerList = currentLobby.filter(
+        ({ name }) => !name.includes(respPlayer.name)
+      );
+
+      let otherPlayer = new OtherPlayers(this);
+
       console.log(respPlayer.hand);
       console.log(respPlayer.isTurn);
       player.addHand(respPlayer.hand);
+
+      otherPlayerList.forEach((x, i) => {
+        otherPlayer.addPlayer(x.name, i);
+      });
     });
 
     // Unhide buttons/ enable buttons
