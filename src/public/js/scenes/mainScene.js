@@ -53,6 +53,7 @@ export default class mainScene extends Phaser.Scene {
       "../../assets/cards.json"
     );
 
+    this.load.image("star", "../../assets/star.png");
     this.load.image("catIcon0", "../../assets/catIcon0.png");
     this.load.image("catIcon1", "../../assets/catIcon1.png");
     this.load.image("catIcon2", "../../assets/catIcon2.png");
@@ -93,20 +94,16 @@ export default class mainScene extends Phaser.Scene {
     }
 
     // Init each players hand after host selects deal
-    socket.on("delt-cards", (respPlayer, currentLobby) => {
-      let otherPlayerList = currentLobby.filter(
-        ({ name }) => !name.includes(respPlayer.name)
-      );
+    socket.on("delt-cards", (respPlayer, currentLobby, otherPlayerList) => {
+      let otherPlayers = new OtherPlayers(this);
+      otherPlayers.addPlayerIcon(currentLobby);
 
-      let otherPlayer = new OtherPlayers(this);
-
+      for (let i = 1; i < otherPlayerList.length; i++) {
+        otherPlayers.addPlayer(otherPlayerList[i], i - 1);
+      }
       console.log(respPlayer.hand);
       console.log(respPlayer.isTurn);
       player.addHand(respPlayer.hand);
-
-      otherPlayerList.forEach((x, i) => {
-        otherPlayer.addPlayer(x.name, i);
-      });
     });
 
     // Unhide buttons/ enable buttons

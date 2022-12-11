@@ -7,13 +7,22 @@ export default class OtherPlayers {
   constructor(scene) {
     this.scene = scene;
     this.otherPlayerCard = [];
+    this.playerIconList = [];
   }
 
-  addPlayer(playerName, pos) {
-    this.render(playerName, pos);
+  addPlayer(player, pos) {
+    this.render(player, pos);
   }
 
-  render(playerName, pos) {
+  checkTurn(player) {}
+
+  addPlayerIcon(playerList) {
+    playerList.forEach((x, i) => {
+      this.playerIconList[x.name] = i;
+    });
+  }
+
+  render(player, pos) {
     let card = this.scene.add
       .image(
         this.playerPos[pos][0] + 100,
@@ -23,19 +32,27 @@ export default class OtherPlayers {
       )
       .setScale(0.5);
     let playerIcon = this.scene.add
-      .image(this.playerPos[pos][0], this.playerPos[pos][1], "catIcon0")
+      .image(
+        this.playerPos[pos][0],
+        this.playerPos[pos][1],
+        `catIcon${this.playerIconList[player.name]}`
+      )
       .setScale(1.5);
 
     let style = { backgroundColor: "yellow", color: "black" };
-    let text = this.scene.add.text(0, 0, playerName, style);
+    let text = this.scene.add.text(0, 0, player.name, style);
 
     let cardNum = this.scene.add.text(0, 0, 13);
     cardNum.setFontSize(60);
-    this.otherPlayerCard[playerName] = cardNum;
+    this.otherPlayerCard[player.name] = cardNum;
 
     Phaser.Display.Align.In.Center(cardNum, card);
     Phaser.Display.Align.In.TopCenter(text, playerIcon);
+
+    if (player.isTurn) {
+      console.log(`${player.name}'s Turn`);
+    }
   }
 
-  updateHand(playerName) {}
+  updateHand() {}
 }

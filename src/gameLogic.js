@@ -25,8 +25,10 @@ class GameLogic {
 
       // Get the lowest delt card and set that player's turn
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
-
+      let otherPlayerList = Array.from(currentLobby.players);
+      otherPlayerList.unshift(otherPlayerList.pop());
       for (let player of currentLobby.players) {
+        otherPlayerList.push(otherPlayerList.shift());
         if (player.hand.find((card) => card === lowestCard)) {
           player.isTurn = true;
           // emit is turn for that player/ enable buttons and last played card for player
@@ -45,7 +47,9 @@ class GameLogic {
               (elm) => elm.id === player.id
             );
         }
-        this.io.to(player.id).emit("delt-cards", player, currentLobby.players);
+        this.io
+          .to(player.id)
+          .emit("delt-cards", player, currentLobby.players, otherPlayerList);
       }
     });
 
