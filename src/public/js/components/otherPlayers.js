@@ -1,7 +1,7 @@
 export default class OtherPlayers {
   playerPos = [
-    [500, 50],
     [50, 275],
+    [500, 50],
     [800, 275],
   ];
   constructor(scene) {
