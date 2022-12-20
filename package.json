@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon .\\src\\app.js"
+    "start": "nodemon .\\src\\app.js",
+    "build": "npx webpack"
   },
   "repository": {
     "type": "git",
@@ -20,11 +21,16 @@
   "homepage": "https://github.com/Jason7539/thirteen-online#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.5.3"
+    "phaser": "^3.55.2",
+    "socket.io": "^4.5.3",
+    "socket.io-client": "^4.5.4"
   },
   "devDependencies": {
     "eslint": "^8.27.0",
     "nodemon": "^2.0.20",
-    "prettier": "2.7.1"
+    "prettier": "2.7.1",
+    "webpack": "^5.75.0",
+    "webpack-bundle-analyzer": "^4.7.0",
+    "webpack-cli": "^5.0.1"
   }
 }

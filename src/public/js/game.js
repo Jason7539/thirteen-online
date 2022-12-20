@@ -1,4 +1,6 @@
 import mainScene from "./scenes/mainScene.js";
+import Phaser from "phaser";
+
 const config = {
   type: Phaser.AUTO,
   parent: "gameRoom",
@@ -9,7 +11,7 @@ const config = {
 };
 
 function initGame() {
-  let game = new Phaser.Game(config);
+  new Phaser.Game(config);
   document.querySelector(".private_lobby_screen").classList.add("hide");
   document.querySelector(".public_lobby_screen").classList.add("hide");
 

@@ -1,5 +1,6 @@
 import Player from "../components/player.js";
 import { socket } from "../client.js";
+import Phaser from "phaser";
 
 // eslint-disable-next-line no-undef
 export default class mainScene extends Phaser.Scene {
