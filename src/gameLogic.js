@@ -27,6 +27,14 @@ class GameLogic {
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
       let otherPlayerList = Array.from(currentLobby.players);
       otherPlayerList.unshift(otherPlayerList.pop());
+      let firstTurn;
+
+      for (let player of currentLobby.players) {
+        if (player.hand.find((card) => card === lowestCard)) {
+          firstTurn = player.name;
+        }
+      }
+
       for (let player of currentLobby.players) {
         otherPlayerList.push(otherPlayerList.shift());
         if (player.hand.find((card) => card === lowestCard)) {
@@ -49,15 +57,22 @@ class GameLogic {
         }
         this.io
           .to(player.id)
-          .emit("delt-cards", player, currentLobby.players, otherPlayerList);
+          .emit(
+            "delt-cards",
+            player,
+            currentLobby.players,
+            otherPlayerList,
+            firstTurn
+          );
       }
     });
 
-    this.socket.on("play-card", (lobbyId, lastPlayed) => {
+    this.socket.on("play-card", (lobbyId, lastPlayed, playerName) => {
       // emit latPlayed to everyone
       console.log("just played: " + JSON.stringify(lastPlayed));
 
       // sends last played. so all clients renders the most recent played card
+
       this.io.to(lobbyId).emit("last-played", lastPlayed);
 
       // send isTurn to the next player
@@ -69,6 +84,7 @@ class GameLogic {
       console.log("next turn is :" + currentLobby.currentPlayerIndex);
       let newPlayerTurn =
         currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+      this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
       this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
     });
 

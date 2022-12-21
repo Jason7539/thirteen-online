@@ -68,6 +68,7 @@ export default class mainScene extends Phaser.Scene {
     let playButton = this.add.image(1100, 540, "play_button").setInteractive();
 
     let player = new Player(this, passButton, playButton);
+    let otherPlayers = new OtherPlayers(this);
     player.disableButtons();
 
     let cardFrames = this.textures.get("cards").getFrameNames();
@@ -94,17 +95,25 @@ export default class mainScene extends Phaser.Scene {
     }
 
     // Init each players hand after host selects deal
-    socket.on("delt-cards", (respPlayer, currentLobby, otherPlayerList) => {
-      let otherPlayers = new OtherPlayers(this);
-      otherPlayers.addPlayerIcon(currentLobby);
+    socket.on(
+      "delt-cards",
+      (respPlayer, currentLobby, otherPlayerList, firstTurn) => {
+        otherPlayers.addPlayerIcon(currentLobby);
 
-      for (let i = 1; i < otherPlayerList.length; i++) {
-        otherPlayers.addPlayer(otherPlayerList[i], i - 1);
+        console.log(firstTurn);
+        for (let i = 1; i < otherPlayerList.length; i++) {
+          otherPlayers.addPlayer(otherPlayerList[i], i - 1);
+        }
+        let playerList = otherPlayerList.map(({ name }) => name);
+        otherPlayers.addPlayerList(playerList);
+
+        otherPlayers.showPlayerTurn(firstTurn);
+
+        console.log(respPlayer.hand);
+        console.log(respPlayer.isTurn);
+        player.addHand(respPlayer.hand);
       }
-      console.log(respPlayer.hand);
-      console.log(respPlayer.isTurn);
-      player.addHand(respPlayer.hand);
-    });
+    );
 
     // Unhide buttons/ enable buttons
     socket.on("isTurn", (lastPlayed) => {
@@ -113,16 +122,20 @@ export default class mainScene extends Phaser.Scene {
       player.enableButtons();
     });
 
+    //update playerTurn
+    socket.on("player-turn", (playerName) => {
+      otherPlayers.showPlayerTurn(playerName);
+    });
+
     // update last-played card
     socket.on("last-played", (lastPlayed) => {
       // Render the most recent played cards in the middle
       player.lastPlayed = lastPlayed;
-
       this.lastPlayedCardFrames = lastPlayed.cardsPlayed;
       this.destroyLastPlayed();
       this.renderLastPlayed();
-
       console.log("someone played:" + JSON.stringify(lastPlayed));
+      otherPlayers.removePlayerTurn();
     });
   }
   update() {}

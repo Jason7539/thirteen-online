@@ -8,13 +8,40 @@ export default class OtherPlayers {
     this.scene = scene;
     this.otherPlayerCard = [];
     this.playerIconList = [];
+    this.playerTurnList = [];
   }
 
   addPlayer(player, pos) {
     this.render(player, pos);
   }
 
-  checkTurn(player) {}
+  addPlayerList(currentPlayerList) {
+    this.currentPlayerList = currentPlayerList;
+  }
+  showPlayerTurn(playerName) {
+    let starPos = 60;
+    let playerTurnPos = this.currentPlayerList.indexOf(playerName) - 1;
+    if (playerTurnPos >= 0) {
+      let playerTurn = this.scene.add
+        .image(
+          this.playerPos[playerTurnPos][0],
+          this.playerPos[playerTurnPos][1] + starPos,
+          "star"
+        )
+        .setScale(0.5);
+      this.playerTurnList.push(playerTurn);
+    }
+  }
+
+  printer() {
+    console.log(this.playerTurnList);
+  }
+
+  removePlayerTurn() {
+    for (let player of this.playerTurnList) {
+      player.destroy();
+    }
+  }
 
   addPlayerIcon(playerList) {
     playerList.forEach((x, i) => {
@@ -48,11 +75,5 @@ export default class OtherPlayers {
 
     Phaser.Display.Align.In.Center(cardNum, card);
     Phaser.Display.Align.In.TopCenter(text, playerIcon);
-
-    if (player.isTurn) {
-      console.log(`${player.name}'s Turn`);
-    }
   }
-
-  updateHand() {}
 }
