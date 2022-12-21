@@ -124,6 +124,7 @@ export default class mainScene extends Phaser.Scene {
 
     //update playerTurn
     socket.on("player-turn", (playerName) => {
+      otherPlayers.removePlayerTurn();
       otherPlayers.showPlayerTurn(playerName);
     });
 

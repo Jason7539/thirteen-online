@@ -113,6 +113,12 @@ class GameLogic {
         this.io
           .to(currentLobby.playersInRound[currentLobby.currentPlayerIndex].id)
           .emit("isTurn", freePlay);
+        this.io
+          .to(lobbyId)
+          .emit(
+            "player-turn",
+            currentLobby.playersInRound[currentLobby.currentPlayerIndex].name
+          );
 
         let playersBefore = [];
         let isAfter = false;
@@ -155,6 +161,7 @@ class GameLogic {
         let newPlayerTurn =
           currentLobby.playersInRound[currentLobby.currentPlayerIndex];
         this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+        this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
       }
     });
   }
