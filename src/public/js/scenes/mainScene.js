@@ -104,6 +104,7 @@ export default class mainScene extends Phaser.Scene {
         for (let i = 1; i < otherPlayerList.length; i++) {
           otherPlayers.addPlayer(otherPlayerList[i], i - 1);
         }
+
         let playerList = otherPlayerList.map(({ name }) => name);
         otherPlayers.addPlayerList(playerList);
 
@@ -111,7 +112,7 @@ export default class mainScene extends Phaser.Scene {
 
         console.log(respPlayer.hand);
         console.log(respPlayer.isTurn);
-        player.addHand(respPlayer.hand);
+        player.addHand(respPlayer.hand, respPlayer);
       }
     );
 
@@ -129,13 +130,18 @@ export default class mainScene extends Phaser.Scene {
     });
 
     // update last-played card
-    socket.on("last-played", (lastPlayed) => {
+    socket.on("last-played", (lastPlayed, playerName) => {
       // Render the most recent played cards in the middle
       player.lastPlayed = lastPlayed;
       this.lastPlayedCardFrames = lastPlayed.cardsPlayed;
       this.destroyLastPlayed();
       this.renderLastPlayed();
       console.log("someone played:" + JSON.stringify(lastPlayed));
+
+      let cards = lastPlayed.cardsPlayed.length;
+      console.log(playerName);
+      otherPlayers.updateCard(playerName, cards);
+
       otherPlayers.removePlayerTurn();
     });
   }

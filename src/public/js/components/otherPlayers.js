@@ -33,10 +33,6 @@ export default class OtherPlayers {
     }
   }
 
-  printer() {
-    console.log(this.playerTurnList);
-  }
-
   removePlayerTurn() {
     for (let player of this.playerTurnList) {
       player.destroy();
@@ -50,6 +46,14 @@ export default class OtherPlayers {
   }
 
   render(player, pos) {
+    let playerIcon = this.scene.add
+      .image(
+        this.playerPos[pos][0],
+        this.playerPos[pos][1],
+        `catIcon${this.playerIconList[player.name]}`
+      )
+      .setScale(1.5);
+
     let card = this.scene.add
       .image(
         this.playerPos[pos][0] + 100,
@@ -58,13 +62,6 @@ export default class OtherPlayers {
         "back"
       )
       .setScale(0.5);
-    let playerIcon = this.scene.add
-      .image(
-        this.playerPos[pos][0],
-        this.playerPos[pos][1],
-        `catIcon${this.playerIconList[player.name]}`
-      )
-      .setScale(1.5);
 
     let style = { backgroundColor: "yellow", color: "black" };
     let text = this.scene.add.text(0, 0, player.name, style);
@@ -75,5 +72,15 @@ export default class OtherPlayers {
 
     Phaser.Display.Align.In.Center(cardNum, card);
     Phaser.Display.Align.In.TopCenter(text, playerIcon);
+  }
+
+  updateCard(playerName, cardsPlayed) {
+    console.log("did Not");
+    if (playerName in this.otherPlayerCard) {
+      let currentCard = Number(this.otherPlayerCard[playerName]._text);
+      currentCard = currentCard - cardsPlayed;
+      this.otherPlayerCard[playerName].setText(currentCard);
+      console.log("did");
+    }
   }
 }
