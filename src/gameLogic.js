@@ -24,14 +24,10 @@ class GameLogic {
       console.log("Players in the current round is: " + JSON.stringify(names));
 
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
-      // let firstPlayerName = currentLobby.players.find(player => player.hand.find((card) => card === lowestCard));
 
-      let firstPlayerName;
-      for (let player of currentLobby.players) {
-        if (player.hand.find((card) => card === lowestCard)) {
-          firstPlayerName = player.name;
-        }
-      }
+      let firstPlayerName = currentLobby.players.find((player) =>
+        player.hand.find((card) => card === lowestCard)
+      );
 
       let otherplayers = Array.from(currentLobby.players);
       otherplayers.unshift(otherplayers.pop());
