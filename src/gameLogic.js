@@ -24,7 +24,6 @@ class GameLogic {
       console.log("Players in the current round is: " + JSON.stringify(names));
 
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
-      // let firstPlayerName = currentLobby.players.find(player => player.hand.find((card) => card === lowestCard));
 
       let firstPlayerName;
       for (let player of currentLobby.players) {
