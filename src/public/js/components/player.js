@@ -21,8 +21,9 @@ export default class Player {
   }
 
   // addHand will call render. registerEvents and register data
-  addHand(hand) {
+  addHand(hand, respPlayer) {
     this.hand = hand;
+    this.respPlayer = respPlayer;
 
     this.hand.sort(function compare(a, b) {
       if (PlayerHelper.calcFaceValue(a) === PlayerHelper.calcFaceValue(b)) {
@@ -165,7 +166,12 @@ export default class Player {
           highestCard: this.cardSelected[this.cardSelected.length - 1].name,
           cardsPlayed: this.cardSelected.map((gameObj) => gameObj.name),
         };
-        socket.emit("play-card", sessionStorage.getItem("lobbyId"), lastPlayed);
+        socket.emit(
+          "play-card",
+          sessionStorage.getItem("lobbyId"),
+          lastPlayed,
+          this.respPlayer.name
+        );
 
         // Update hand to remove selected cards
         this.hand = this.hand.filter((cardFrameName) => {

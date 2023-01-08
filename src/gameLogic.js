@@ -23,12 +23,30 @@ class GameLogic {
       let names = currentLobby.playersInRound.map((player) => player.name);
       console.log("Players in the current round is: " + JSON.stringify(names));
 
-      currentLobby.players.forEach((player) =>
-        this.io.to(player.id).emit("delt-cards", player)
-      );
-
-      // Get the lowest delt card and set that player's turn
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
+
+      let firstPlayerName;
+      for (let player of currentLobby.players) {
+        if (player.hand.find((card) => card === lowestCard)) {
+          firstPlayerName = player.name;
+        }
+      }
+
+      let otherplayers = Array.from(currentLobby.players);
+      otherplayers.unshift(otherplayers.pop());
+
+      for (let player of currentLobby.players) {
+        otherplayers.push(otherplayers.shift());
+        this.io
+          .to(player.id)
+          .emit(
+            "delt-cards",
+            player,
+            currentLobby.players,
+            otherplayers,
+            firstPlayerName
+          );
+      }
 
       for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === lowestCard)) {
@@ -52,12 +70,9 @@ class GameLogic {
       }
     });
 
-    this.socket.on("play-card", (lobbyId, lastPlayed) => {
+    this.socket.on("play-card", (lobbyId, lastPlayed, playerName) => {
       // emit latPlayed to everyone
       console.log("just played: " + JSON.stringify(lastPlayed));
-
-      // sends last played. so all clients renders the most recent played card
-      this.io.to(lobbyId).emit("last-played", lastPlayed);
 
       // send isTurn to the next player
       // have an inner array for the current round of players
@@ -68,6 +83,10 @@ class GameLogic {
       console.log("next turn is :" + currentLobby.currentPlayerIndex);
       let newPlayerTurn =
         currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+      // sends last played. so all clients renders the most recent played card
+      this.io.to(lobbyId).emit("last-played", lastPlayed, playerName);
+
+      this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
       this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
     });
 
@@ -96,6 +115,12 @@ class GameLogic {
         this.io
           .to(currentLobby.playersInRound[currentLobby.currentPlayerIndex].id)
           .emit("isTurn", freePlay);
+        this.io
+          .to(lobbyId)
+          .emit(
+            "player-turn",
+            currentLobby.playersInRound[currentLobby.currentPlayerIndex].name
+          );
 
         let playersBefore = [];
         let isAfter = false;
@@ -138,6 +163,7 @@ class GameLogic {
         let newPlayerTurn =
           currentLobby.playersInRound[currentLobby.currentPlayerIndex];
         this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+        this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
       }
     });
   }
