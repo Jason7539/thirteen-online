@@ -25,9 +25,12 @@ class GameLogic {
 
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
 
-      let firstPlayerName = currentLobby.players.find((player) =>
-        player.hand.find((card) => card === lowestCard)
-      );
+      let firstPlayerName;
+      for (let player of currentLobby.players) {
+        if (player.hand.find((card) => card === lowestCard)) {
+          firstPlayerName = player.name;
+        }
+      }
 
       let otherplayers = Array.from(currentLobby.players);
       otherplayers.unshift(otherplayers.pop());
