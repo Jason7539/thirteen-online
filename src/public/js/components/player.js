@@ -34,7 +34,6 @@ export default class Player {
     });
 
     this.render(this.handXorigin, this.handYorigin);
-    this.registerEvents();
   }
 
   render(startX, startY) {
@@ -186,7 +185,6 @@ export default class Player {
         this.cardSelected = [];
 
         this.render(this.handXorigin, this.handYorigin);
-        this.registerEvents();
 
         this.disableButtons();
       } else {
@@ -202,6 +200,12 @@ export default class Player {
         sessionStorage.getItem("lobbyId"),
         this.lastPlayed
       );
+
+      this.destroyHandGameObjects();
+      this.handGameObjects = [];
+      this.cardSelected = [];
+
+      this.render(this.handXorigin, this.handYorigin);
 
       this.disableButtons();
     });

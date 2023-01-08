@@ -23,20 +23,33 @@ class GameLogic {
       let names = currentLobby.playersInRound.map((player) => player.name);
       console.log("Players in the current round is: " + JSON.stringify(names));
 
-      // Get the lowest delt card and set that player's turn
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
-      let otherPlayerList = Array.from(currentLobby.players);
-      otherPlayerList.unshift(otherPlayerList.pop());
-      let firstTurn;
+      // let firstPlayerName = currentLobby.players.find(player => player.hand.find((card) => card === lowestCard));
 
+      let firstPlayerName;
       for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === lowestCard)) {
-          firstTurn = player.name;
+          firstPlayerName = player.name;
         }
       }
 
+      let otherplayers = Array.from(currentLobby.players);
+      otherplayers.unshift(otherplayers.pop());
+
       for (let player of currentLobby.players) {
-        otherPlayerList.push(otherPlayerList.shift());
+        otherplayers.push(otherplayers.shift());
+        this.io
+          .to(player.id)
+          .emit(
+            "delt-cards",
+            player,
+            currentLobby.players,
+            otherplayers,
+            firstPlayerName
+          );
+      }
+
+      for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === lowestCard)) {
           player.isTurn = true;
           // emit is turn for that player/ enable buttons and last played card for player
@@ -55,15 +68,6 @@ class GameLogic {
               (elm) => elm.id === player.id
             );
         }
-        this.io
-          .to(player.id)
-          .emit(
-            "delt-cards",
-            player,
-            currentLobby.players,
-            otherPlayerList,
-            firstTurn
-          );
       }
     });
 
