@@ -108,7 +108,18 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("lobby-deletion", () => {});
+  socket.on("lobby-deletion", (lobbyId) => {
+    let delRoomIndex = lobbies.findIndex((lobby) => lobby.id === lobbyId);
+
+    console.log("room index" + delRoomIndex);
+    if (delRoomIndex > -1) {
+      // sockets disconnect from room(lobby) to be deleted
+      io.of(lobbies[delRoomIndex].id).disconnectSockets(true);
+
+      console.log("deleted room at index: " + delRoomIndex);
+      lobbies.splice(delRoomIndex, 1);
+    }
+  });
 
   socket.on("player-creation", () => {});
 });

@@ -166,11 +166,15 @@ export default class Player {
           highestCard: this.cardSelected[this.cardSelected.length - 1].name,
           cardsPlayed: this.cardSelected.map((gameObj) => gameObj.name),
         };
+
+        let isWinner = this.hand.length - this.cardSelected.length === 0;
+
         socket.emit(
           "play-card",
           sessionStorage.getItem("lobbyId"),
           lastPlayed,
-          this.respPlayer.name
+          this.respPlayer.name,
+          isWinner
         );
 
         // Update hand to remove selected cards
