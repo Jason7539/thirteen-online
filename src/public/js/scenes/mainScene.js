@@ -94,6 +94,43 @@ export default class mainScene extends Phaser.Scene {
       });
     }
 
+    //send chat Message
+    const chatForm = document.getElementById("chat-form");
+    const chatMessage = document.querySelector(".chat-messages");
+
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const msg = document.getElementById("msg").value;
+
+      socket.emit(
+        "chatMessage",
+        sessionStorage.getItem("lobbyId"),
+        sessionStorage.getItem("username"),
+        msg
+      );
+
+      document.getElementById("msg").value = "";
+      document.getElementById("msg").focus();
+    });
+
+    //message from server
+    socket.on("message", (message) => {
+      outputMessage(message);
+      chatMessage.scrollTop = chatMessage.scrollHeight;
+    });
+
+    //output message
+
+    const outputMessage = (message) => {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.innerHTML = `<p class="meta">${message.username} <span> ${message.time}</span></p>
+      <p class="text"> ${message.text}
+      </p>`;
+      document.querySelector(".chat-messages").appendChild(div);
+    };
+
     // Init each players hand after host selects deal
     socket.on(
       "delt-cards",
@@ -137,7 +174,7 @@ export default class mainScene extends Phaser.Scene {
       this.lastPlayedCardFrames = lastPlayed.cardsPlayed;
       this.destroyLastPlayed();
       this.renderLastPlayed();
-      console.log("someone played:" + JSON.stringify(lastPlayed));
+      console.log(`${playerName} just played` + JSON.stringify(lastPlayed));
 
       let cards = lastPlayed.cardsPlayed.length;
       console.log(playerName);

@@ -21,6 +21,7 @@ socket.on("update-lobby", (lobby) => {
 
 socket.on("init-game", () => {
   initGame();
+  document.querySelector(".chat-container").classList.remove("hide");
 });
 
 socket.on("host-disconnect", () => {

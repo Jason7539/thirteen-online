@@ -1,4 +1,5 @@
 import PlayerHelper from "./public/js/components/playerHelper.js";
+import moment from "moment";
 // TODO: add a destructor upon socket disconnect
 class GameLogic {
   constructor(io, socket, lobbies) {
@@ -68,6 +69,19 @@ class GameLogic {
             );
         }
       }
+    });
+
+    const formatMessage = (username, text) => {
+      return {
+        username,
+        text,
+        time: moment().format("h:mm a"),
+      };
+    };
+
+    //listen to message
+    this.socket.on("chatMessage", (lobbyId, username, msg) => {
+      this.io.to(lobbyId).emit("message", formatMessage(username, msg));
     });
 
     this.socket.on("play-card", (lobbyId, lastPlayed, playerName) => {

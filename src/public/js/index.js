@@ -154,6 +154,7 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
 
 document.getElementById("start_button").addEventListener("click", () => {
   socket.emit("init-game", sessionStorage.getItem("lobbyId"));
+
   // TODO: hide create/join lobby on game start?
 });
 
