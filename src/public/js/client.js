@@ -19,9 +19,10 @@ socket.on("update-lobby", (lobby) => {
   }
 });
 
-socket.on("init-game", () => {
+socket.on("init-game", (lobbyName) => {
   initGame();
   document.querySelector(".chat-container").classList.remove("hide");
+  document.getElementById("lobbyName").innerHTML = `${lobbyName}`;
 });
 
 socket.on("host-disconnect", () => {
