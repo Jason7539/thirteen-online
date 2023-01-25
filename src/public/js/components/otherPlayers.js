@@ -75,12 +75,10 @@ export default class OtherPlayers {
   }
 
   updateCard(playerName, cardsPlayed) {
-    console.log("did Not");
     if (playerName in this.otherPlayerCard) {
       let currentCard = Number(this.otherPlayerCard[playerName]._text);
       currentCard = currentCard - cardsPlayed;
       this.otherPlayerCard[playerName].setText(currentCard);
-      console.log("did");
     }
   }
 }

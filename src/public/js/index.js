@@ -135,6 +135,7 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
 
       sessionStorage.setItem("username", username);
       sessionStorage.setItem("lobbyId", "lobby-" + socket.id);
+      sessionStorage.setItem("lobbyName", lobbyname);
 
       socket.emit("lobby-creation", lobbyname, username, (response) => {
         console.log(response);
@@ -153,7 +154,12 @@ document.getElementById("lobby_screen_form").addEventListener("submit", (e) => {
 });
 
 document.getElementById("start_button").addEventListener("click", () => {
-  socket.emit("init-game", sessionStorage.getItem("lobbyId"));
+  socket.emit(
+    "init-game",
+    sessionStorage.getItem("lobbyId"),
+    sessionStorage.getItem("lobbyName")
+  );
+
   // TODO: hide create/join lobby on game start?
 });
 

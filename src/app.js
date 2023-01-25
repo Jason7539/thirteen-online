@@ -96,8 +96,8 @@ io.on("connection", (socket) => {
     io.to(lobbyId).emit("update-lobby", lobbies[lobbyToJoinIndex]);
   });
 
-  socket.on("init-game", (lobbyId) => {
-    io.to(lobbyId).emit("init-game");
+  socket.on("init-game", (lobbyId, lobbyName) => {
+    io.to(lobbyId).emit("init-game", lobbyName);
   });
 
   // send all lobbies for joining players
