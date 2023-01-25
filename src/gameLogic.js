@@ -71,37 +71,40 @@ class GameLogic {
       }
     });
 
-    const formatMessage = (username, text) => {
+    function formatMessage(username, text) {
       return {
         username,
         text,
         time: moment().format("h:mm a"),
       };
-    };
+    }
 
     //listen to message
     this.socket.on("chatMessage", (lobbyId, username, msg) => {
       this.io.to(lobbyId).emit("message", formatMessage(username, msg));
     });
 
-    this.socket.on("play-card", (lobbyId, lastPlayed, playerName) => {
-      // emit latPlayed to everyone
-      console.log("just played: " + JSON.stringify(lastPlayed));
+    this.socket.on("play-card", (lobbyId, lastPlayed, playerName, isWinner) => {
+      if (isWinner) {
+        this.io.to(lobbyId).emit("win-game", playerName, lobbyId);
+      } else {
+        // emit latPlayed to everyone
+        console.log("just played: " + JSON.stringify(lastPlayed));
 
-      // send isTurn to the next player
-      // have an inner array for the current round of players
-      let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+        // have an inner array for the current round of players
+        let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
 
-      currentLobby.currentPlayerIndex += 1;
-      currentLobby.currentPlayerIndex %= currentLobby.playersInRound.length;
-      console.log("next turn is :" + currentLobby.currentPlayerIndex);
-      let newPlayerTurn =
-        currentLobby.playersInRound[currentLobby.currentPlayerIndex];
-      // sends last played. so all clients renders the most recent played card
-      this.io.to(lobbyId).emit("last-played", lastPlayed, playerName);
+        currentLobby.currentPlayerIndex += 1;
+        currentLobby.currentPlayerIndex %= currentLobby.playersInRound.length;
+        console.log("next turn is :" + currentLobby.currentPlayerIndex);
+        let newPlayerTurn =
+          currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+        // sends last played. so all clients renders the most recent played card
+        this.io.to(lobbyId).emit("last-played", lastPlayed, playerName);
 
-      this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
-      this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+        this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
+        this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+      }
     });
 
     this.socket.on("pass-button", (lobbyId, lastPlayed) => {

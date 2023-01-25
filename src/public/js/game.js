@@ -18,5 +18,4 @@ function initGame() {
   document.querySelector(".lobby_screen").classList.add("hide");
   document.querySelector(".join_lobby_screen").classList.add("hide");
 }
-
-export default initGame;
+export { initGame };

@@ -1,6 +1,6 @@
 "use strict";
 
-import initGame from "./game.js";
+import { initGame } from "./game.js";
 
 // eslint-disable-next-line no-undef
 var socket = io();

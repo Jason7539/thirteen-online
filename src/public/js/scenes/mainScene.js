@@ -182,6 +182,13 @@ export default class mainScene extends Phaser.Scene {
 
       otherPlayers.removePlayerTurn();
     });
+
+    socket.on("win-game", (player, lobbyId) => {
+      this.sys.game.destroy(true);
+      alert("player: " + player + " has won");
+
+      socket.emit("lobby-deletion", lobbyId);
+    });
   }
   update() {}
 }
