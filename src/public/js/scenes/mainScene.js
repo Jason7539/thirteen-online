@@ -131,6 +131,16 @@ export default class mainScene extends Phaser.Scene {
       document.querySelector(".chat-messages").appendChild(div);
     };
 
+    //Delete Message Test
+    const deleteMessage = () => {
+      document.querySelector(".chat-messages").replaceChildren();
+    };
+
+    //Hide ChatBox
+    const hideChatBox = () => {
+      document.querySelector(".chat-container").classList.add("hide");
+    };
+
     // Init each players hand after host selects deal
     socket.on(
       "delt-cards",
@@ -185,6 +195,8 @@ export default class mainScene extends Phaser.Scene {
 
     socket.on("win-game", (player, lobbyId) => {
       this.sys.game.destroy(true);
+      hideChatBox();
+      deleteMessage();
       alert("player: " + player + " has won");
 
       socket.emit("lobby-deletion", lobbyId);
