@@ -23,6 +23,11 @@ socket.on("init-game", (lobbyName) => {
   initGame();
   document.querySelector(".chat-container").classList.remove("hide");
   document.getElementById("lobbyName").innerHTML = `${lobbyName}`;
+
+  // clear player names in lobby when game starts
+  for (let i = 0; i < MAX_PLAYERS; i++) {
+    document.querySelector("#p" + i).innerHTML = "";
+  }
 });
 
 socket.on("host-disconnect", () => {
