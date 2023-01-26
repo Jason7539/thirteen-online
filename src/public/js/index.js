@@ -4,15 +4,15 @@ sessionStorage.clear();
 
 import { MAX_PLAYERS, socket, MAX_LOBBY } from "./client.js";
 
-document.querySelector("#login_btn").addEventListener("click", () => {
-  hide_content();
-  document.querySelector(".login_page").classList.remove("hide");
-});
+// document.querySelector("#login_btn").addEventListener("click", () => {
+//   hide_content();
+//   document.querySelector(".login_page").classList.remove("hide");
+// });
 
-document.querySelector("#signup_btn").addEventListener("click", () => {
-  hide_content();
-  document.querySelector(".signup_page").classList.remove("hide");
-});
+// document.querySelector("#signup_btn").addEventListener("click", () => {
+//   hide_content();
+//   document.querySelector(".signup_page").classList.remove("hide");
+// });
 
 document.querySelector("#create_room_btn").addEventListener("click", () => {
   hide_content();
