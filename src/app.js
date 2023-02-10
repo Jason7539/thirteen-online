@@ -96,8 +96,8 @@ io.on("connection", (socket) => {
     io.to(lobbyId).emit("update-lobby", lobbies[lobbyToJoinIndex]);
   });
 
-  socket.on("init-game", (lobbyId) => {
-    io.to(lobbyId).emit("init-game");
+  socket.on("init-game", (lobbyId, lobbyName) => {
+    io.to(lobbyId).emit("init-game", lobbyName);
   });
 
   // send all lobbies for joining players
@@ -108,7 +108,18 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("lobby-deletion", () => {});
+  socket.on("lobby-deletion", (lobbyId) => {
+    let delRoomIndex = lobbies.findIndex((lobby) => lobby.id === lobbyId);
+
+    console.log("room index" + delRoomIndex);
+    if (delRoomIndex > -1) {
+      // sockets disconnect from room(lobby) to be deleted
+      io.of(lobbies[delRoomIndex].id).disconnectSockets(true);
+
+      console.log("deleted room at index: " + delRoomIndex);
+      lobbies.splice(delRoomIndex, 1);
+    }
+  });
 
   socket.on("player-creation", () => {});
 });

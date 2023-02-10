@@ -1,4 +1,5 @@
 import PlayerHelper from "./public/js/components/playerHelper.js";
+import moment from "moment";
 // TODO: add a destructor upon socket disconnect
 class GameLogic {
   constructor(io, socket, lobbies) {
@@ -23,12 +24,30 @@ class GameLogic {
       let names = currentLobby.playersInRound.map((player) => player.name);
       console.log("Players in the current round is: " + JSON.stringify(names));
 
-      currentLobby.players.forEach((player) =>
-        this.io.to(player.id).emit("delt-cards", player)
-      );
-
-      // Get the lowest delt card and set that player's turn
       let lowestCard = Dealer.getLowestCard(currentLobby.players);
+
+      let firstPlayerName;
+      for (let player of currentLobby.players) {
+        if (player.hand.find((card) => card === lowestCard)) {
+          firstPlayerName = player.name;
+        }
+      }
+
+      let otherplayers = Array.from(currentLobby.players);
+      otherplayers.unshift(otherplayers.pop());
+
+      for (let player of currentLobby.players) {
+        otherplayers.push(otherplayers.shift());
+        this.io
+          .to(player.id)
+          .emit(
+            "delt-cards",
+            player,
+            currentLobby.players,
+            otherplayers,
+            firstPlayerName
+          );
+      }
 
       for (let player of currentLobby.players) {
         if (player.hand.find((card) => card === lowestCard)) {
@@ -52,23 +71,40 @@ class GameLogic {
       }
     });
 
-    this.socket.on("play-card", (lobbyId, lastPlayed) => {
-      // emit latPlayed to everyone
-      console.log("just played: " + JSON.stringify(lastPlayed));
+    function formatMessage(username, text) {
+      return {
+        username,
+        text,
+        time: moment().format("h:mm a"),
+      };
+    }
 
-      // sends last played. so all clients renders the most recent played card
-      this.io.to(lobbyId).emit("last-played", lastPlayed);
+    //listen to message
+    this.socket.on("chatMessage", (lobbyId, username, msg) => {
+      this.io.to(lobbyId).emit("message", formatMessage(username, msg));
+    });
 
-      // send isTurn to the next player
-      // have an inner array for the current round of players
-      let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+    this.socket.on("play-card", (lobbyId, lastPlayed, playerName, isWinner) => {
+      if (isWinner) {
+        this.io.to(lobbyId).emit("win-game", playerName, lobbyId);
+      } else {
+        // emit latPlayed to everyone
+        console.log("just played: " + JSON.stringify(lastPlayed));
 
-      currentLobby.currentPlayerIndex += 1;
-      currentLobby.currentPlayerIndex %= currentLobby.playersInRound.length;
-      console.log("next turn is :" + currentLobby.currentPlayerIndex);
-      let newPlayerTurn =
-        currentLobby.playersInRound[currentLobby.currentPlayerIndex];
-      this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+        // have an inner array for the current round of players
+        let currentLobby = this.lobbies.find((lobby) => lobby.id === lobbyId);
+
+        currentLobby.currentPlayerIndex += 1;
+        currentLobby.currentPlayerIndex %= currentLobby.playersInRound.length;
+        console.log("next turn is :" + currentLobby.currentPlayerIndex);
+        let newPlayerTurn =
+          currentLobby.playersInRound[currentLobby.currentPlayerIndex];
+        // sends last played. so all clients renders the most recent played card
+        this.io.to(lobbyId).emit("last-played", lastPlayed, playerName);
+
+        this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
+        this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+      }
     });
 
     this.socket.on("pass-button", (lobbyId, lastPlayed) => {
@@ -96,6 +132,12 @@ class GameLogic {
         this.io
           .to(currentLobby.playersInRound[currentLobby.currentPlayerIndex].id)
           .emit("isTurn", freePlay);
+        this.io
+          .to(lobbyId)
+          .emit(
+            "player-turn",
+            currentLobby.playersInRound[currentLobby.currentPlayerIndex].name
+          );
 
         let playersBefore = [];
         let isAfter = false;
@@ -138,6 +180,7 @@ class GameLogic {
         let newPlayerTurn =
           currentLobby.playersInRound[currentLobby.currentPlayerIndex];
         this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
+        this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
       }
     });
   }
