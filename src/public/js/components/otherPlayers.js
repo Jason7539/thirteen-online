@@ -9,6 +9,7 @@ export default class OtherPlayers {
     this.otherPlayerCard = [];
     this.playerIconList = [];
     this.playerTurnList = [];
+    this.currentPlayerInLobby = [];
   }
 
   addPlayer(player, pos) {
@@ -45,6 +46,22 @@ export default class OtherPlayers {
     });
   }
 
+  //current player in the Round
+  currentPlayer(currentPlayer) {
+    let keys = Object.keys(this.currentPlayerInLobby);
+    const outTheLoop = keys.filter((name) => !currentPlayer.includes(name));
+
+    outTheLoop.forEach((player) => {
+      this.currentPlayerInLobby[player].alpha = 0.5;
+    });
+
+    if (currentPlayer.length > keys.length) {
+      keys.forEach((player) => {
+        this.currentPlayerInLobby[player].alpha = 1;
+      });
+    }
+  }
+
   render(player, pos) {
     let playerIcon = this.scene.add
       .image(
@@ -53,6 +70,7 @@ export default class OtherPlayers {
         `catIcon${this.playerIconList[player.name]}`
       )
       .setScale(1.5);
+    this.currentPlayerInLobby[player.name] = playerIcon;
 
     let card = this.scene.add
       .image(

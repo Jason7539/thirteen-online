@@ -71,6 +71,7 @@ class GameLogic {
       }
     });
 
+    //format message coming from users
     function formatMessage(username, text) {
       return {
         username,
@@ -84,11 +85,20 @@ class GameLogic {
       this.io.to(lobbyId).emit("message", formatMessage(username, msg));
     });
 
+    this.socket.on("notValid", (playerId) => {
+      this.io
+        .to(playerId)
+        .emit(
+          "errorMessage",
+          formatMessage("Game", "Not A Valid Play, Please try again")
+        );
+    });
+
     this.socket.on("play-card", (lobbyId, lastPlayed, playerName, isWinner) => {
       if (isWinner) {
         this.io.to(lobbyId).emit("win-game", playerName, lobbyId);
       } else {
-        // emit latPlayed to everyone
+        // emit lastPlayed to everyone
         console.log("just played: " + JSON.stringify(lastPlayed));
 
         // have an inner array for the current round of players
@@ -167,7 +177,13 @@ class GameLogic {
           currentLobby.playersInRound
         );
         console.log(
-          "round rest is now: ",
+          "round reset is now: ",
+          currentLobby.playersInRound.map((p) => p.name)
+        );
+
+        //rest the rounds for other player
+        this.io.to(lobbyId).emit(
+          "resetRound",
           currentLobby.playersInRound.map((p) => p.name)
         );
 
@@ -181,6 +197,12 @@ class GameLogic {
           currentLobby.playersInRound[currentLobby.currentPlayerIndex];
         this.io.to(newPlayerTurn.id).emit("isTurn", lastPlayed);
         this.io.to(lobbyId).emit("player-turn", newPlayerTurn.name);
+
+        //send current player in the round to mainScene
+        this.io.to(lobbyId).emit(
+          "currentPlayerInRound",
+          currentLobby.playersInRound.map((p) => p.name)
+        );
       }
     });
   }

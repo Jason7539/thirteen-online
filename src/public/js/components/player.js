@@ -11,13 +11,14 @@ export default class Player {
   lastPlayed = {};
   validSelection = false;
 
-  constructor(scene, passButton, playButton) {
+  constructor(scene, passButton, playButton, playerTurn) {
     this.scene = scene;
     this.hand = [];
     this.cardSelected = [];
     this.handGameObjects = [];
     this.passButton = passButton;
     this.playButton = playButton;
+    this.playerTurn = playerTurn;
   }
 
   // addHand will call render. registerEvents and register data
@@ -141,9 +142,18 @@ export default class Player {
     }
   }
 
+  //show Player Turn
+  showPlayerTurn() {
+    this.playerTurn.setVisible(true);
+  }
+
+  hidePlayerTurn() {
+    this.playerTurn.setVisible(false);
+  }
+
   disableButtons() {
-    this.playButton.setVisible(false);
-    this.passButton.setVisible(false);
+    //this.playButton.setVisible(false);
+    //this.passButton.setVisible(false);
 
     this.removeButtonEvents();
   }
@@ -158,7 +168,7 @@ export default class Player {
   addButtonEvents() {
     this.playButton.on("pointerdown", () => {
       if (this.validSelection) {
-        alert(this.validSelection);
+        //alert(this.validSelection);
 
         let lastPlayed = {
           repitition: PlayerHelper.calcRepitionCount(this.cardSelected),
@@ -191,8 +201,9 @@ export default class Player {
         this.render(this.handXorigin, this.handYorigin);
 
         this.disableButtons();
+        this.hidePlayerTurn();
       } else {
-        alert("not a valid play");
+        socket.emit("notValid", this.respPlayer.id);
       }
     });
 
@@ -212,6 +223,7 @@ export default class Player {
       this.render(this.handXorigin, this.handYorigin);
 
       this.disableButtons();
+      this.hidePlayerTurn();
     });
   }
   removeButtonEvents() {
