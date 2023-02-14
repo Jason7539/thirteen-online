@@ -60,6 +60,7 @@ export default class mainScene extends Phaser.Scene {
 
     this.load.image("pass_button", "../../assets/pass_button.png");
     this.load.image("play_button", "../../assets/play_button.png");
+    this.load.image("yourTurn", "../../assets/yourTurn.png");
   }
   create() {
     let passButton = this.add.image(900, 540, "pass_button").setInteractive();
