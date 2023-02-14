@@ -195,6 +195,7 @@ export default class mainScene extends Phaser.Scene {
 
     socket.on("win-game", (player, lobbyId) => {
       this.sys.game.destroy(true);
+      document.querySelector(".lobby_btn").classList.remove("hide");
       hideChatBox();
       deleteMessage();
       alert("player: " + player + " has won");

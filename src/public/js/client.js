@@ -21,6 +21,8 @@ socket.on("update-lobby", (lobby) => {
 
 socket.on("init-game", (lobbyName) => {
   initGame();
+  //hide lobby buttons
+  document.querySelector(".lobby_btn").classList.add("hide");
   document.querySelector(".chat-container").classList.remove("hide");
   document.getElementById("lobbyName").innerHTML = `${lobbyName}`;
 
