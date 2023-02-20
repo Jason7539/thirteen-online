@@ -52,7 +52,6 @@ export default class mainScene extends Phaser.Scene {
       "../../assets/cards.png",
       "../../assets/cards.json"
     );
-
     this.load.image("star", "../../assets/star.png");
     this.load.image("catIcon0", "../../assets/catIcon0.png");
     this.load.image("catIcon1", "../../assets/catIcon1.png");
@@ -61,14 +60,16 @@ export default class mainScene extends Phaser.Scene {
 
     this.load.image("pass_button", "../../assets/pass_button.png");
     this.load.image("play_button", "../../assets/play_button.png");
+    this.load.image("yourTurn", "../../assets/yourTurn.png");
   }
-
   create() {
     let passButton = this.add.image(900, 540, "pass_button").setInteractive();
     let playButton = this.add.image(1100, 540, "play_button").setInteractive();
+    let playerTurn = this.add.image(900, 575, "yourTurn");
 
-    let player = new Player(this, passButton, playButton);
+    let player = new Player(this, passButton, playButton, playerTurn);
     let otherPlayers = new OtherPlayers(this);
+    player.hidePlayerTurn();
     player.disableButtons();
 
     let cardFrames = this.textures.get("cards").getFrameNames();
@@ -114,6 +115,12 @@ export default class mainScene extends Phaser.Scene {
       document.getElementById("msg").focus();
     });
 
+    //catch Error Message
+    socket.on("errorMessage", (message) => {
+      outputMessage(message);
+      chatMessage.scrollTop = chatMessage.scrollHeight;
+    });
+
     //message from server
     socket.on("message", (message) => {
       outputMessage(message);
@@ -147,7 +154,6 @@ export default class mainScene extends Phaser.Scene {
       (respPlayer, currentLobby, otherPlayerList, firstTurn) => {
         otherPlayers.addPlayerIcon(currentLobby);
 
-        console.log(firstTurn);
         for (let i = 1; i < otherPlayerList.length; i++) {
           otherPlayers.addPlayer(otherPlayerList[i], i - 1);
         }
@@ -165,10 +171,21 @@ export default class mainScene extends Phaser.Scene {
 
     // Unhide buttons/ enable buttons
     socket.on("isTurn", (lastPlayed) => {
-      alert("your turn");
       player.lastPlayed = lastPlayed;
       player.registerEvents();
       player.enableButtons();
+      player.showPlayerTurn();
+    });
+
+    //showPlayerInRound
+    socket.on("currentPlayerInRound", (currentPlayer) => {
+      console.log(currentPlayer);
+      otherPlayers.currentPlayer(currentPlayer);
+    });
+
+    socket.on("resetRound", (reset) => {
+      console.log(`Reset: ${reset}`);
+      otherPlayers.currentPlayer(reset);
     });
 
     //update playerTurn
